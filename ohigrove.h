@@ -36,6 +36,12 @@
 
 #include "libohiboard.h"
 
+typedef enum _OhiGrove_Board
+{
+    OHIGROVE_BOARD_FRDMKL25,
+    OHIGROVE_BOARD_TOPPING_R0,
+} OhiGrove_Board;
+
 typedef enum _OhiGrove_Conn
 {
 #if defined(FRDMKL25Z)
@@ -52,7 +58,7 @@ typedef enum _OhiGrove_Conn
     OHIGROVE_CONN_A1,
     OHIGROVE_CONN_A2,
     OHIGROVE_CONN_A3,
-#elif defined (GROVETOPPING-R0)
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
     OHIGROVE_CONN_UART1,
     OHIGROVE_CONN_UART2,
     OHIGROVE_CONN_UART3,
@@ -79,15 +85,26 @@ typedef enum _OhiGrove_PinType
     OHIGROVE_PIN_TYPE_PWM,
     OHIGROVE_PIN_TYPE_I2C,
     OHIGROVE_PIN_TYPE_UART,
-//#if defined (MK60DZ10)
-//    OHIGROVE_PIN_TYPE_SPI,
-//#endif
+#if defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+    OHIGROVE_PIN_TYPE_SPI,
+#endif
     OHIGROVE_PIN_TYPE_NONE,
 } OhiGrove_PinType;
 
+typedef enum _OhiGrove_PinNumber
+{
+    OHIGROVE_PIN_NUMBER_1,
+    OHIGROVE_PIN_NUMBER_2,    
+} OhiGrove_PinNumber;
+
+void OhiGrove_initBoard(OhiGrove_Board board);
 
 void OhiGrove_enableConnector (OhiGrove_Conn conn, 
                                OhiGrove_PinType typePin1, 
                                OhiGrove_PinType typePin2);
+
+void OhiGrove_setDigital (OhiGrove_Conn conn, 
+                          Gpio_Level level, 
+                          OhiGrove_PinNumber number);
 
 #endif /* __OHIGROVE_H */

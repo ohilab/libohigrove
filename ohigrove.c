@@ -37,6 +37,30 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
                                OhiGrove_PinType typePin1, 
                                OhiGrove_PinType typePin2)
 {
+#if defined (FRDMKL25Z)
+    
+    switch (conn)
+    {
+    case OHIGROVE_CONN_D2:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTD4,GPIO_PINS_OUTPUT);
+        }
+        
+        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_OUTPUT);
+        }
+        
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+    
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+
     switch (conn)
     {
     case OHIGROVE_CONN_D2:
@@ -46,4 +70,56 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         /* Nothing to do! */
         break;
     }
+
+#endif
+}
+
+void OhiGrove_initBoard (OhiGrove_Board board)
+{
+    switch (board)
+    {
+    case OHIGROVE_BOARD_FRDMKL25:
+        
+        break;
+    case OHIGROVE_BOARD_TOPPING_R0:
+        
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+}
+
+void OhiGrove_setDigital (OhiGrove_Conn conn, 
+                          Gpio_Level level, 
+                          OhiGrove_PinNumber number)
+{
+#if defined (FRDMKL25Z)
+    Gpio_Pins pin;
+    
+    
+    switch (conn)
+    {
+    case OHIGROVE_CONN_D2:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = GPIO_PINS_PTD4;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = GPIO_PINS_PTA12;
+        
+        if (level == GPIO_HIGH)
+            Gpio_set(pin);
+        else
+            Gpio_clear(pin);
+
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+    
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+
+
+#endif
 }
