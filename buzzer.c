@@ -24,7 +24,7 @@
  ******************************************************************************/
 
 /**
- * @file ohigrovelib/buzzer.c
+ * @file libohigrove/buzzer.c
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */

@@ -25,7 +25,7 @@
  ******************************************************************************/
 
 /**
- * @file ohigrovelib/ohigrove.h
+ * @file libohigrove/ohigrove.h
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @author Marco Contigiani <marco.contigiani86@gmail.com>
  * @brief 

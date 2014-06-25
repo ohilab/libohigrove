@@ -24,7 +24,7 @@
  ******************************************************************************/
 
 /**
- * @file ohigrovelib/relay.c
+ * @file libohigrove/relay.c
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
