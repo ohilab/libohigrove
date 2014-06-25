@@ -47,10 +47,200 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         {
             Gpio_config(GPIO_PINS_PTD4,GPIO_PINS_OUTPUT);
         }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTD4,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
         
         if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
         {
             Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        break;
+    case OHIGROVE_CONN_D3:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA4,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA4,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        break;
+    case OHIGROVE_CONN_D4:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA4,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA4,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA5,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA5,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        break;
+    case OHIGROVE_CONN_D5:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA5,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA5,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTC8,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTC8,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        break;
+    case OHIGROVE_CONN_D6:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTC8,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTC8,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTC9,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTC9,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        break;
+    case OHIGROVE_CONN_D7:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTC9,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTC9,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA13,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA13,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        break;
+    case OHIGROVE_CONN_D8:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA13,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTA13,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
+        }
+        
+        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
+        {
+            Gpio_config(GPIO_PINS_PTD5,GPIO_PINS_OUTPUT);
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
+        {
+            Gpio_config(GPIO_PINS_PTD5,GPIO_PINS_INPUT);            
+        }
+        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
+        {
+            /* TODO: ... */
         }
         
         break;
@@ -106,18 +296,68 @@ void OhiGrove_setDigital (OhiGrove_Conn conn,
             pin = GPIO_PINS_PTD4;
         else if (number == OHIGROVE_PIN_NUMBER_2)
             pin = GPIO_PINS_PTA12;
-        
-        if (level == GPIO_HIGH)
-            Gpio_set(pin);
-        else
-            Gpio_clear(pin);
 
+        break;
+    case OHIGROVE_CONN_D3:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = GPIO_PINS_PTA12;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = GPIO_PINS_PTA4;
+
+        break;
+    case OHIGROVE_CONN_D4:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = GPIO_PINS_PTA4;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = GPIO_PINS_PTA5;
+        
+        break;
+    case OHIGROVE_CONN_D5:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = GPIO_PINS_PTA5;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = GPIO_PINS_PTC8;
+
+        break;
+    case OHIGROVE_CONN_D6:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = GPIO_PINS_PTC8;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = GPIO_PINS_PTC9;
+
+        break;
+    case OHIGROVE_CONN_D7:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = GPIO_PINS_PTC9;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = GPIO_PINS_PTA13;
+
+        break;
+    case OHIGROVE_CONN_D8:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = GPIO_PINS_PTA13;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = GPIO_PINS_PTD5;
+        
         break;
     default:
         /* Nothing to do! */
         break;
     }
     
+    if (level == GPIO_HIGH)
+        Gpio_set(pin);
+    else if (level == GPIO_TOGGLE)
+        Gpio_toggle(pin);
+    else
+        Gpio_clear(pin);
+
 #elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
 
 
