@@ -48,4 +48,8 @@ void OhiGroveBuzzer_off (OhiGroveBuzzer_Device* dev)
     OhiGrove_setDigital(dev->connector,GPIO_LOW,OHIGROVE_PIN_NUMBER_1);    
 }
 
+void OhiGroveBuzzer_toggle (OhiGroveBuzzer_Device* dev)
+{
+    OhiGrove_setDigital(dev->connector,GPIO_TOGGLE,OHIGROVE_PIN_NUMBER_1);    
+}
 

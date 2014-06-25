@@ -42,8 +42,9 @@ typedef struct _OhiGroveBuzzer_Device
 
 void OhiGroveBuzzer_init (OhiGroveBuzzer_Device* dev);
 
-void OhiGroveBuzzer_on (OhiGroveBuzzer_Device* dev);
-void OhiGroveBuzzer_off (OhiGroveBuzzer_Device* dev);
+void OhiGroveBuzzer_on     (OhiGroveBuzzer_Device* dev);
+void OhiGroveBuzzer_off    (OhiGroveBuzzer_Device* dev);
+void OhiGroveBuzzer_toggle (OhiGroveBuzzer_Device* dev);
 
 
 #endif /* __BUZZER_H */
