@@ -37,7 +37,7 @@
 typedef struct _OhiGroveBuzzer_Device
 {
     OhiGrove_Conn connector;
-
+    Gpio_Pins pin;
 } OhiGroveBuzzer_Device;
 
 void OhiGroveBuzzer_init (OhiGroveBuzzer_Device* dev);

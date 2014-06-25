@@ -36,20 +36,22 @@ void OhiGroveBuzzer_init (OhiGroveBuzzer_Device* dev)
     OhiGrove_enableConnector(dev->connector,
                              OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT,
                              OHIGROVE_PIN_TYPE_NONE);
+    dev->pin = OhiGrove_getDigitalPin(dev->connector,OHIGROVE_PIN_NUMBER_1);
+
 }
 
 void OhiGroveBuzzer_on (OhiGroveBuzzer_Device* dev)
 {
-    OhiGrove_setDigital(dev->connector,GPIO_HIGH,OHIGROVE_PIN_NUMBER_1);
+    OhiGrove_setDigital(dev->pin,GPIO_HIGH);
 }
 
 void OhiGroveBuzzer_off (OhiGroveBuzzer_Device* dev)
 {
-    OhiGrove_setDigital(dev->connector,GPIO_LOW,OHIGROVE_PIN_NUMBER_1);    
+    OhiGrove_setDigital(dev->pin,GPIO_LOW);    
 }
 
 void OhiGroveBuzzer_toggle (OhiGroveBuzzer_Device* dev)
 {
-    OhiGrove_setDigital(dev->connector,GPIO_TOGGLE,OHIGROVE_PIN_NUMBER_1);    
+    OhiGrove_setDigital(dev->pin,GPIO_TOGGLE);    
 }
 

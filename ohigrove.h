@@ -103,8 +103,9 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
                                OhiGrove_PinType typePin1, 
                                OhiGrove_PinType typePin2);
 
-void OhiGrove_setDigital (OhiGrove_Conn conn, 
-                          Gpio_Level level, 
-                          OhiGrove_PinNumber number);
+Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn conn,
+                                  OhiGrove_PinNumber number);
+void OhiGrove_setDigital (Gpio_Pins pin, Gpio_Level level);
+Gpio_Level OhiGrove_getDigital (Gpio_Pins pin);
 
 #endif /* __OHIGROVE_H */

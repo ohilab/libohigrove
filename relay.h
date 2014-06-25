@@ -37,7 +37,7 @@
 typedef struct _OhiGroveRelay_Device
 {
     OhiGrove_Conn connector;
-
+    Gpio_Pins pin;
 } OhiGroveRelay_Device;
 
 void OhiGroveRelay_init (OhiGroveRelay_Device* dev);

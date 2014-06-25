@@ -280,13 +280,12 @@ void OhiGrove_initBoard (OhiGrove_Board board)
     }
 }
 
-void OhiGrove_setDigital (OhiGrove_Conn conn, 
-                          Gpio_Level level, 
-                          OhiGrove_PinNumber number)
+Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn conn,
+                                  OhiGrove_PinNumber number)
 {
-#if defined (FRDMKL25Z)
-    Gpio_Pins pin;
+    Gpio_Pins pin = GPIO_PINS_NONE;
     
+#if defined (FRDMKL25Z)
     
     switch (conn)
     {
@@ -351,15 +350,31 @@ void OhiGrove_setDigital (OhiGrove_Conn conn,
         break;
     }
     
-    if (level == GPIO_HIGH)
-        Gpio_set(pin);
-    else if (level == GPIO_TOGGLE)
-        Gpio_toggle(pin);
-    else
-        Gpio_clear(pin);
-
 #elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
 
 
 #endif
+    
+    return pin;
+}
+
+void OhiGrove_setDigital (Gpio_Pins pin, Gpio_Level level)
+{
+    if (pin != GPIO_PINS_NONE)
+    {
+        if (level == GPIO_HIGH)
+            Gpio_set(pin);
+        else if (level == GPIO_TOGGLE)
+            Gpio_toggle(pin);
+        else
+            Gpio_clear(pin);
+    }
+}
+
+Gpio_Level OhiGrove_getDigital (Gpio_Pins pin)
+{    
+    if (pin != GPIO_PINS_NONE)
+        return Gpio_get(pin);
+    else
+        return 0;
 }
