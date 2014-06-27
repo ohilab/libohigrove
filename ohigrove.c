@@ -33,6 +33,79 @@
 
 #include "ohigrove.h"
 
+static Ftm_Config OhiGrove_highFrequency = 
+{
+    .mode              = FTM_MODE_PWM,
+
+    .timerFrequency    = 1000,
+    .initCounter       = 0,
+
+    .pins              = {FTM_PINS_STOP},
+//    .duty              = {0.3 * 32768},
+    
+    .configurationBits = FTM_CONFIG_PWM_EDGE_ALIGNED | FTM_CONFIG_PWM_POLARITY_LOW | 0,
+};
+
+static Ftm_Config OhiGrove_lowFrequency = 
+{
+    .mode              = FTM_MODE_PWM,
+
+    .timerFrequency    = 500,
+    .initCounter       = 0,
+
+    .pins              = {FTM_PINS_STOP},
+    
+    .configurationBits = FTM_CONFIG_PWM_EDGE_ALIGNED | FTM_CONFIG_PWM_POLARITY_LOW | 0,
+};
+
+static Ftm_Config OhiGrove_baseTimer = 
+{
+    .mode              = FTM_MODE_FREE,
+
+    .timerFrequency    = 1000,
+    .initCounter       = 0,
+};
+
+static uint32_t OhiGrove_milliseconds = 0;
+static void OhiGrove_baseTimerInterrupt (void)
+{
+    OhiGrove_milliseconds++;
+}
+
+void OhiGrove_delay (uint32_t msDelay)
+{
+    uint32_t currTicks = OhiGrove_milliseconds;
+
+    while ((OhiGrove_milliseconds - currTicks) < msDelay);
+}
+
+void OhiGrove_initBoard (OhiGrove_Board board)
+{
+    switch (board)
+    {
+    case OHIGROVE_BOARD_FRDMKL25:
+        /* Enable clock gate for ports to enable pin routing */
+        SIM_SCGC5 |= (
+                SIM_SCGC5_PORTA_MASK | 
+                SIM_SCGC5_PORTB_MASK | 
+                SIM_SCGC5_PORTC_MASK | 
+                SIM_SCGC5_PORTD_MASK | 
+                SIM_SCGC5_PORTE_MASK);
+
+        Ftm_init(FTM0,0,&OhiGrove_highFrequency);
+        Ftm_init(FTM1,0,&OhiGrove_lowFrequency);
+        Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
+        OhiGrove_milliseconds = 0;
+        break;
+    case OHIGROVE_BOARD_TOPPING_R0:
+        
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+}
+
 void OhiGrove_enableConnector (OhiGrove_Conn conn, 
                                OhiGrove_PinType typePin1, 
                                OhiGrove_PinType typePin2)
@@ -53,7 +126,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTD4,1);
         }
         
         if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
@@ -66,7 +139,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM1,FTM_PINS_PTA12,1);
         }
         
         break;
@@ -82,7 +155,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM1,FTM_PINS_PTA12,1);
         }
         
         if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
@@ -95,7 +168,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTA4,1);
         }
         
         break;
@@ -111,7 +184,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTA4,1);
         }
         
         if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
@@ -124,7 +197,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTA5,1);
         }
         
         break;
@@ -140,7 +213,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTA5,1);
         }
         
         if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
@@ -153,7 +226,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTC8,1);
         }
         
         break;
@@ -169,7 +242,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTC8,1);
         }
         
         if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
@@ -182,7 +255,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTC9,1);
         }
         
         break;
@@ -198,7 +271,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTC9,1);
         }
         
         if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
@@ -211,7 +284,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM1,FTM_PINS_PTA13,1);
         }
         
         break;
@@ -227,7 +300,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM1,FTM_PINS_PTA13,1);
         }
         
         if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
@@ -240,7 +313,7 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
         {
-            /* TODO: ... */
+            Ftm_addPwmPin(FTM0,FTM_PINS_PTD5,1);
         }
         
         break;
@@ -262,22 +335,6 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
     }
 
 #endif
-}
-
-void OhiGrove_initBoard (OhiGrove_Board board)
-{
-    switch (board)
-    {
-    case OHIGROVE_BOARD_FRDMKL25:
-        
-        break;
-    case OHIGROVE_BOARD_TOPPING_R0:
-        
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
 }
 
 Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn conn,
@@ -378,3 +435,239 @@ Gpio_Level OhiGrove_getDigital (Gpio_Pins pin)
     else
         return 0;
 }
+
+Ftm_Pins OhiGrove_getPwmPin (OhiGrove_Conn conn,
+                             OhiGrove_PinNumber number)
+{
+    Ftm_Pins pin = FTM_PINS_STOP;
+    
+#if defined (FRDMKL25Z)
+    
+    switch (conn)
+    {
+    case OHIGROVE_CONN_D2:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = FTM_PINS_PTD4;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = FTM_PINS_PTA12;
+
+        break;
+    case OHIGROVE_CONN_D3:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = FTM_PINS_PTA12;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = FTM_PINS_PTA4;
+
+        break;
+    case OHIGROVE_CONN_D4:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = FTM_PINS_PTA4;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = FTM_PINS_PTA5;
+        
+        break;
+    case OHIGROVE_CONN_D5:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = FTM_PINS_PTA5;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = FTM_PINS_PTC8;
+
+        break;
+    case OHIGROVE_CONN_D6:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = FTM_PINS_PTC8;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = FTM_PINS_PTC9;
+
+        break;
+    case OHIGROVE_CONN_D7:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = FTM_PINS_PTC9;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = FTM_PINS_PTA13;
+
+        break;
+    case OHIGROVE_CONN_D8:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = FTM_PINS_PTA13;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = FTM_PINS_PTD5;
+        
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+    
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+
+
+#endif
+    
+    return pin;
+}
+
+Ftm_Channels OhiGrove_getPwmChannel (OhiGrove_Conn conn,
+                                     OhiGrove_PinNumber number)
+{
+    Ftm_Channels channel;
+    
+#if defined (FRDMKL25Z)
+    
+    switch (conn)
+    {
+    case OHIGROVE_CONN_D2:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = FTM_CHANNELS_CH4;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = FTM_CHANNELS_CH0;
+
+        break;
+    case OHIGROVE_CONN_D3:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = FTM_CHANNELS_CH0;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = FTM_CHANNELS_CH1;
+
+        break;
+    case OHIGROVE_CONN_D4:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = FTM_CHANNELS_CH1;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = FTM_CHANNELS_CH2;
+        
+        break;
+    case OHIGROVE_CONN_D5:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = FTM_CHANNELS_CH2;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = FTM_CHANNELS_CH4;
+
+        break;
+    case OHIGROVE_CONN_D6:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = FTM_CHANNELS_CH4;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = FTM_CHANNELS_CH5;
+
+        break;
+    case OHIGROVE_CONN_D7:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = FTM_CHANNELS_CH5;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = FTM_CHANNELS_CH1;
+
+        break;
+    case OHIGROVE_CONN_D8:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = FTM_CHANNELS_CH1;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = FTM_CHANNELS_CH5;
+        
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+    
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+
+
+#endif
+    
+    return channel;
+}
+
+Ftm_DeviceHandle OhiGrove_getPwmDevice (OhiGrove_Conn conn,
+                                        OhiGrove_PinNumber number)
+{
+    Ftm_DeviceHandle dev;
+    
+#if defined (FRDMKL25Z)
+    
+    switch (conn)
+    {
+    case OHIGROVE_CONN_D2:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            dev = FTM0;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            dev = FTM1;
+
+        break;
+    case OHIGROVE_CONN_D3:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            dev = FTM1;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            dev = FTM0;
+
+        break;
+    case OHIGROVE_CONN_D4:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            dev = FTM0;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            dev = FTM0;
+        
+        break;
+    case OHIGROVE_CONN_D5:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            dev = FTM0;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            dev = FTM0;
+
+        break;
+    case OHIGROVE_CONN_D6:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            dev = FTM0;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            dev = FTM0;
+
+        break;
+    case OHIGROVE_CONN_D7:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            dev = FTM0;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            dev = FTM1;
+
+        break;
+    case OHIGROVE_CONN_D8:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            dev = FTM1;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            dev = FTM0;
+        
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+    
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+
+
+#endif
+    
+    return dev;
+}
+
+
