@@ -96,6 +96,11 @@ void OhiGrove_initBoard (OhiGrove_Board board)
         Ftm_init(FTM1,0,&OhiGrove_lowFrequency);
         Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
         OhiGrove_milliseconds = 0;
+        
+        /* Enable ADC */
+        Adc_setAverage(ADC0,ADC_AVERAGE_4_SAMPLES);
+        Adc_setResolution(ADC0,ADC_RESOLUTION_12BIT);
+        Adc_init(ADC0);
         break;
     case OHIGROVE_BOARD_TOPPING_R0:
         
@@ -317,6 +322,58 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
         }
         
         break;
+        
+    case OHIGROVE_CONN_A0:
+        if (typePin1 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
+        {
+            Adc_enablePin(ADC0,ADC_PINS_PTB0);
+        }
+
+        if (typePin2 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
+        {
+            Adc_enablePin(ADC0,ADC_PINS_PTB1);
+        }
+        
+        break;
+    case OHIGROVE_CONN_A1:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
+        {
+            Adc_enablePin(ADC0,ADC_PINS_PTB1);
+        }
+
+        if (typePin2 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
+        {
+            Adc_enablePin(ADC0,ADC_PINS_PTB2);
+        }
+        
+        break;
+    case OHIGROVE_CONN_A2:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
+        {
+            Adc_enablePin(ADC0,ADC_PINS_PTB2);
+        }
+
+        if (typePin2 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
+        {
+            Adc_enablePin(ADC0,ADC_PINS_PTB3);
+        }
+        
+        break;
+    case OHIGROVE_CONN_A3:
+        
+        if (typePin1 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
+        {
+            Adc_enablePin(ADC0,ADC_PINS_PTB3);
+        }
+
+        if (typePin2 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
+        {
+            Adc_enablePin(ADC0,ADC_PINS_PTC2);
+        }
+        
+        break;
     default:
         /* Nothing to do! */
         break;
@@ -336,6 +393,130 @@ void OhiGrove_enableConnector (OhiGrove_Conn conn,
 
 #endif
 }
+
+Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn conn,
+                                OhiGrove_PinNumber number)
+{
+    Adc_Pins pin = ADC_PINS_INTERNAL;
+    
+#if defined (FRDMKL25Z)
+    
+    switch (conn)
+    {
+    case OHIGROVE_CONN_A0:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = ADC_PINS_PTB0;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = ADC_PINS_PTB1;
+        break;
+    case OHIGROVE_CONN_A1:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = ADC_PINS_PTB1;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = ADC_PINS_PTB2;
+
+        break;
+    case OHIGROVE_CONN_A2:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = ADC_PINS_PTB2;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = ADC_PINS_PTB3;
+
+        break;
+    case OHIGROVE_CONN_A3:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            pin = ADC_PINS_PTB3;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            pin = ADC_PINS_PTC2;
+
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+    
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+
+
+#endif
+    
+    return pin;
+}
+
+Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn conn,
+                                           OhiGrove_PinNumber number)
+{
+    Adc_DeviceHandle dev;
+    
+#if defined (FRDMKL25Z)
+    
+    dev = ADC0;
+    
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+
+
+#endif
+    
+    return dev;
+}
+
+Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn conn,
+                                             OhiGrove_PinNumber number)
+{
+    Adc_ChannelNumber channel = ADC_CH_DISABLE;
+    
+#if defined (FRDMKL25Z)
+    
+    switch (conn)
+    {
+    case OHIGROVE_CONN_A0:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = ADC_CH_SE8;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = ADC_CH_SE9;
+        break;
+    case OHIGROVE_CONN_A1:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = ADC_CH_SE9;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = ADC_CH_SE12;
+
+        break;
+    case OHIGROVE_CONN_A2:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = ADC_CH_SE12;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = ADC_CH_SE13;
+
+        break;
+    case OHIGROVE_CONN_A3:
+        
+        if (number == OHIGROVE_PIN_NUMBER_1)
+            channel = ADC_CH_SE13;
+        else if (number == OHIGROVE_PIN_NUMBER_2)
+            channel = ADC_CH_SE11;
+
+        break;
+    default:
+        /* Nothing to do! */
+        break;
+    }
+    
+#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+
+
+#endif
+    
+    return channel;
+}
+
 
 Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn conn,
                                   OhiGrove_PinNumber number)

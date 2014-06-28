@@ -118,4 +118,11 @@ Ftm_DeviceHandle OhiGrove_getPwmDevice (OhiGrove_Conn conn,
                                         OhiGrove_PinNumber number);
 void OhiGrove_setPwmDuty (Ftm_Channels channel, uint32_t duty);
 
+Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn conn,
+                                OhiGrove_PinNumber number);
+Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn conn,
+                                           OhiGrove_PinNumber number);
+Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn conn,
+                                             OhiGrove_PinNumber number);
+
 #endif /* __OHIGROVE_H */
