@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #ifndef __BUZZER_H
 #define __BUZZER_H
 
@@ -48,3 +48,4 @@ void OhiGroveBuzzer_toggle (OhiGroveBuzzer_Device* dev);
 
 
 #endif /* __BUZZER_H */
+#endif

@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #include "digital-out.h"
 
 void OhiGroveDigitalOut_init (OhiGroveDigitalOut_Device* dev)
@@ -55,3 +55,4 @@ void OhiGroveDigitalOut_toggle (OhiGroveDigitalOut_Device* dev)
     OhiGrove_setDigital(dev->pin,GPIO_TOGGLE);    
 }
 
+#endif

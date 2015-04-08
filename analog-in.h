@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #ifndef __ANALOG_IN_H
 #define __ANALOG_IN_H
 
@@ -49,3 +49,4 @@ void OhiGroveAnalogIn_init (OhiGroveAnalogIn_Device* dev);
 uint16_t OhiGroveAnalogIn_get (OhiGroveAnalogIn_Device* dev);
 
 #endif /* __BUZZER_H */
+#endif

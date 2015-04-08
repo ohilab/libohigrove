@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #ifndef __DIGITAL_OUT_H
 #define __DIGITAL_OUT_H
 
@@ -48,3 +48,4 @@ void OhiGroveDigitalOut_toggle (OhiGroveDigitalOut_Device* dev);
 
 
 #endif /* __DIGITAL_OUT_H */
+#endif

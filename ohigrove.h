@@ -44,8 +44,8 @@ typedef enum _OhiGrove_Board
 
 typedef enum _OhiGrove_Conn
 {
-#if defined(FRDMKL25Z)
-    OHIGROVE_CONN_UART,
+#if defined(LIBOHIBOARD_FRDMKL25Z)
+    OHIGROVE_CONN_UART = 0,
     OHIGROVE_CONN_D2,
     OHIGROVE_CONN_D3,
     OHIGROVE_CONN_D4,
@@ -58,7 +58,7 @@ typedef enum _OhiGrove_Conn
     OHIGROVE_CONN_A1,
     OHIGROVE_CONN_A2,
     OHIGROVE_CONN_A3,
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
     OHIGROVE_CONN_UART1,
     OHIGROVE_CONN_UART2,
     OHIGROVE_CONN_UART3,
@@ -85,9 +85,7 @@ typedef enum _OhiGrove_PinType
     OHIGROVE_PIN_TYPE_PWM,
     OHIGROVE_PIN_TYPE_I2C,
     OHIGROVE_PIN_TYPE_UART,
-#if defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-    OHIGROVE_PIN_TYPE_SPI,
-#endif
+
     OHIGROVE_PIN_TYPE_NONE,
 } OhiGrove_PinType;
 
@@ -97,32 +95,10 @@ typedef enum _OhiGrove_PinNumber
     OHIGROVE_PIN_NUMBER_2,    
 } OhiGrove_PinNumber;
 
-void OhiGrove_initBoard(OhiGrove_Board board);
-
-void OhiGrove_enableConnector (OhiGrove_Conn conn, 
-                               OhiGrove_PinType typePin1, 
-                               OhiGrove_PinType typePin2);
+void OhiGrove_initBoard();
 
 void OhiGrove_delay (uint32_t msDelay);
 
-Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn conn,
-                                  OhiGrove_PinNumber number);
-void OhiGrove_setDigital (Gpio_Pins pin, Gpio_Level level);
-Gpio_Level OhiGrove_getDigital (Gpio_Pins pin);
-
-Ftm_Pins OhiGrove_getPwmPin (OhiGrove_Conn conn,
-                             OhiGrove_PinNumber number);
-Ftm_Channels OhiGrove_getPwmChannel (OhiGrove_Conn conn,
-                                     OhiGrove_PinNumber number);
-Ftm_DeviceHandle OhiGrove_getPwmDevice (OhiGrove_Conn conn,
-                                        OhiGrove_PinNumber number);
-void OhiGrove_setPwmDuty (Ftm_Channels channel, uint32_t duty);
-
-Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn conn,
-                                OhiGrove_PinNumber number);
-Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn conn,
-                                           OhiGrove_PinNumber number);
-Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn conn,
-                                             OhiGrove_PinNumber number);
+Gpio_Pins OhiGrove_getDigitalPin(OhiGrove_Conn connector);
 
 #endif /* __OHIGROVE_H */

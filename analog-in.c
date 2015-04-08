@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #include "analog-in.h"
 
 void OhiGroveAnalogIn_init (OhiGroveAnalogIn_Device* dev)
@@ -51,3 +51,4 @@ uint16_t OhiGroveAnalogIn_get (OhiGroveAnalogIn_Device* dev)
     return result;
 }
 
+#endif

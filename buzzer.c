@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #include "buzzer.h"
 
 void OhiGroveBuzzer_init (OhiGroveBuzzer_Device* dev)
@@ -55,3 +55,4 @@ void OhiGroveBuzzer_toggle (OhiGroveBuzzer_Device* dev)
     OhiGrove_setDigital(dev->pin,GPIO_TOGGLE);    
 }
 
+#endif

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -33,30 +33,63 @@
 
 #include "ohigrove.h"
 
-static Ftm_Config OhiGrove_highFrequency = 
+
+typedef struct
 {
-    .mode              = FTM_MODE_PWM,
+    OhiGrove_Conn connector;   /*< The grove connector of the shield/topping */
 
-    .timerFrequency    = 1000,
-    .initCounter       = 0,
+    Gpio_Pins pin1;
+    Gpio_Pins pin2;
+} OhiGrove_DigitalConnector;
 
-    .pins              = {FTM_PINS_STOP},
-//    .duty              = {0.3 * 32768},
-    
-    .configurationBits = FTM_CONFIG_PWM_EDGE_ALIGNED | FTM_CONFIG_PWM_POLARITY_LOW | 0,
+const OhiGrove_DigitalConnector OhiGrove_Digital[] =
+{
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+
+    {OHIGROVE_CONN_UART, GPIO_PINS_PTA1, GPIO_PINS_PTA2},
+    {OHIGROVE_CONN_D2,   GPIO_PINS_PTD4, GPIO_PINS_PTA12},
+
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+#endif
 };
 
-static Ftm_Config OhiGrove_lowFrequency = 
-{
-    .mode              = FTM_MODE_PWM,
+#if defined (LIBOHIBOARD_FRDMKL25Z)
 
-    .timerFrequency    = 500,
-    .initCounter       = 0,
+    Clock_Config OhiGrove_clockConfig = {
+        .source = CLOCK_CRYSTAL,
+        .fext = 8000000,
+        .foutSys = 40000000,
+        .busDivider = 2,
+    };
 
-    .pins              = {FTM_PINS_STOP},
-    
-    .configurationBits = FTM_CONFIG_PWM_EDGE_ALIGNED | FTM_CONFIG_PWM_POLARITY_LOW | 0,
-};
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+#endif
+
+//static Ftm_Config OhiGrove_highFrequency =
+//{
+//    .mode              = FTM_MODE_PWM,
+//
+//    .timerFrequency    = 1000,
+//    .initCounter       = 0,
+//
+//    .pins              = {FTM_PINS_STOP},
+//
+//    .configurationBits = FTM_CONFIG_PWM_EDGE_ALIGNED | FTM_CONFIG_PWM_POLARITY_LOW | 0,
+//};
+//
+//static Ftm_Config OhiGrove_lowFrequency =
+//{
+//    .mode              = FTM_MODE_PWM,
+//
+//    .timerFrequency    = 500,
+//    .initCounter       = 0,
+//
+//    .pins              = {FTM_PINS_STOP},
+//
+//    .configurationBits = FTM_CONFIG_PWM_EDGE_ALIGNED | FTM_CONFIG_PWM_POLARITY_LOW | 0,
+//};
 
 static Ftm_Config OhiGrove_baseTimer = 
 {
@@ -79,776 +112,43 @@ void OhiGrove_delay (uint32_t msDelay)
     while ((OhiGrove_milliseconds - currTicks) < msDelay);
 }
 
-void OhiGrove_initBoard (OhiGrove_Board board)
+void OhiGrove_initBoard ()
 {
-    switch (board)
-    {
-    case OHIGROVE_BOARD_FRDMKL25:
-        /* Enable clock gate for ports to enable pin routing */
-        SIM_SCGC5 |= (
-                SIM_SCGC5_PORTA_MASK | 
-                SIM_SCGC5_PORTB_MASK | 
-                SIM_SCGC5_PORTC_MASK | 
-                SIM_SCGC5_PORTD_MASK | 
-                SIM_SCGC5_PORTE_MASK);
+    uint32_t foutBUS;
+    uint32_t foutSYS;
+    System_Errors errors = ERRORS_NO_ERROR;
 
-        Ftm_init(FTM0,0,&OhiGrove_highFrequency);
-        Ftm_init(FTM1,0,&OhiGrove_lowFrequency);
-        Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
-        OhiGrove_milliseconds = 0;
-        
-        /* Enable ADC */
-        Adc_setAverage(ADC0,ADC_AVERAGE_4_SAMPLES);
-        Adc_setResolution(ADC0,ADC_RESOLUTION_12BIT);
-        Adc_init(ADC0);
-        break;
-    case OHIGROVE_BOARD_TOPPING_R0:
-        
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-}
+#if defined (LIBOHIBOARD_FRDMKL25Z)
 
-void OhiGrove_enableConnector (OhiGrove_Conn conn, 
-                               OhiGrove_PinType typePin1, 
-                               OhiGrove_PinType typePin2)
-{
-#if defined (FRDMKL25Z)
+    /* Enable clock gate for ports to enable pin routing */
+    SIM_SCGC5 |= (
+            SIM_SCGC5_PORTA_MASK |
+            SIM_SCGC5_PORTB_MASK |
+            SIM_SCGC5_PORTC_MASK |
+            SIM_SCGC5_PORTD_MASK |
+            SIM_SCGC5_PORTE_MASK);
+
+    errors = Clock_Init(&OhiGrove_clockConfig);
+    errors = Clock_setDividers(OhiGrove_clockConfig.busDivider, 0,0);
+    foutSYS = Clock_getFrequency(CLOCK_SYSTEM);
+    foutBUS = Clock_getFrequency(CLOCK_BUS);
+
+
+//    Ftm_init(FTM0,0,&OhiGrove_highFrequency);
+//    Ftm_init(FTM1,0,&OhiGrove_lowFrequency);
+    Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
+    OhiGrove_milliseconds = 0;
+
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
     
-    switch (conn)
-    {
-    case OHIGROVE_CONN_D2:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTD4,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTD4,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTD4,1);
-        }
-        
-        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM1,FTM_PINS_PTA12,1);
-        }
-        
-        break;
-    case OHIGROVE_CONN_D3:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA12,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM1,FTM_PINS_PTA12,1);
-        }
-        
-        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA4,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA4,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTA4,1);
-        }
-        
-        break;
-    case OHIGROVE_CONN_D4:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA4,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA4,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTA4,1);
-        }
-        
-        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA5,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA5,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTA5,1);
-        }
-        
-        break;
-    case OHIGROVE_CONN_D5:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA5,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA5,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTA5,1);
-        }
-        
-        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTC8,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTC8,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTC8,1);
-        }
-        
-        break;
-    case OHIGROVE_CONN_D6:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTC8,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTC8,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTC8,1);
-        }
-        
-        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTC9,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTC9,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTC9,1);
-        }
-        
-        break;
-    case OHIGROVE_CONN_D7:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTC9,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTC9,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTC9,1);
-        }
-        
-        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA13,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA13,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM1,FTM_PINS_PTA13,1);
-        }
-        
-        break;
-    case OHIGROVE_CONN_D8:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA13,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTA13,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM1,FTM_PINS_PTA13,1);
-        }
-        
-        if (typePin2 == OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT)
-        {
-            Gpio_config(GPIO_PINS_PTD5,GPIO_PINS_OUTPUT);
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_DIGITAL_INPUT)
-        {
-            Gpio_config(GPIO_PINS_PTD5,GPIO_PINS_INPUT);            
-        }
-        else if (typePin1 == OHIGROVE_PIN_TYPE_PWM)
-        {
-            Ftm_addPwmPin(FTM0,FTM_PINS_PTD5,1);
-        }
-        
-        break;
-        
-    case OHIGROVE_CONN_A0:
-        if (typePin1 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
-        {
-            Adc_enablePin(ADC0,ADC_PINS_PTB0);
-        }
-
-        if (typePin2 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
-        {
-            Adc_enablePin(ADC0,ADC_PINS_PTB1);
-        }
-        
-        break;
-    case OHIGROVE_CONN_A1:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
-        {
-            Adc_enablePin(ADC0,ADC_PINS_PTB1);
-        }
-
-        if (typePin2 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
-        {
-            Adc_enablePin(ADC0,ADC_PINS_PTB2);
-        }
-        
-        break;
-    case OHIGROVE_CONN_A2:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
-        {
-            Adc_enablePin(ADC0,ADC_PINS_PTB2);
-        }
-
-        if (typePin2 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
-        {
-            Adc_enablePin(ADC0,ADC_PINS_PTB3);
-        }
-        
-        break;
-    case OHIGROVE_CONN_A3:
-        
-        if (typePin1 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
-        {
-            Adc_enablePin(ADC0,ADC_PINS_PTB3);
-        }
-
-        if (typePin2 == OHIGROVE_PIN_TYPE_ANALOG_INPUT)
-        {
-            Adc_enablePin(ADC0,ADC_PINS_PTC2);
-        }
-        
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-    
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-
-    switch (conn)
-    {
-    case OHIGROVE_CONN_D2:
-        
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-
 #endif
 }
 
-Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn conn,
-                                OhiGrove_PinNumber number)
+Gpio_Pins OhiGrove_getDigitalPin(OhiGrove_Conn connector)
 {
-    Adc_Pins pin = ADC_PINS_INTERNAL;
-    
-#if defined (FRDMKL25Z)
-    
-    switch (conn)
-    {
-    case OHIGROVE_CONN_A0:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = ADC_PINS_PTB0;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = ADC_PINS_PTB1;
-        break;
-    case OHIGROVE_CONN_A1:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = ADC_PINS_PTB1;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = ADC_PINS_PTB2;
-
-        break;
-    case OHIGROVE_CONN_A2:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = ADC_PINS_PTB2;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = ADC_PINS_PTB3;
-
-        break;
-    case OHIGROVE_CONN_A3:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = ADC_PINS_PTB3;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = ADC_PINS_PTC2;
-
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-    
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-
-
-#endif
-    
-    return pin;
-}
-
-Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn conn,
-                                           OhiGrove_PinNumber number)
-{
-    Adc_DeviceHandle dev;
-    
-#if defined (FRDMKL25Z)
-    
-    dev = ADC0;
-    
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-
-
-#endif
-    
-    return dev;
-}
-
-Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn conn,
-                                             OhiGrove_PinNumber number)
-{
-    Adc_ChannelNumber channel = ADC_CH_DISABLE;
-    
-#if defined (FRDMKL25Z)
-    
-    switch (conn)
-    {
-    case OHIGROVE_CONN_A0:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = ADC_CH_SE8;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = ADC_CH_SE9;
-        break;
-    case OHIGROVE_CONN_A1:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = ADC_CH_SE9;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = ADC_CH_SE12;
-
-        break;
-    case OHIGROVE_CONN_A2:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = ADC_CH_SE12;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = ADC_CH_SE13;
-
-        break;
-    case OHIGROVE_CONN_A3:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = ADC_CH_SE13;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = ADC_CH_SE11;
-
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-    
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-
-
-#endif
-    
-    return channel;
-}
-
-
-Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn conn,
-                                  OhiGrove_PinNumber number)
-{
-    Gpio_Pins pin = GPIO_PINS_NONE;
-    
-#if defined (FRDMKL25Z)
-    
-    switch (conn)
-    {
-    case OHIGROVE_CONN_D2:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = GPIO_PINS_PTD4;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = GPIO_PINS_PTA12;
-
-        break;
-    case OHIGROVE_CONN_D3:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = GPIO_PINS_PTA12;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = GPIO_PINS_PTA4;
-
-        break;
-    case OHIGROVE_CONN_D4:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = GPIO_PINS_PTA4;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = GPIO_PINS_PTA5;
-        
-        break;
-    case OHIGROVE_CONN_D5:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = GPIO_PINS_PTA5;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = GPIO_PINS_PTC8;
-
-        break;
-    case OHIGROVE_CONN_D6:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = GPIO_PINS_PTC8;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = GPIO_PINS_PTC9;
-
-        break;
-    case OHIGROVE_CONN_D7:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = GPIO_PINS_PTC9;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = GPIO_PINS_PTA13;
-
-        break;
-    case OHIGROVE_CONN_D8:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = GPIO_PINS_PTA13;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = GPIO_PINS_PTD5;
-        
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-    
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-
-
-#endif
-    
-    return pin;
-}
-
-void OhiGrove_setDigital (Gpio_Pins pin, Gpio_Level level)
-{
-    if (pin != GPIO_PINS_NONE)
-    {
-        if (level == GPIO_HIGH)
-            Gpio_set(pin);
-        else if (level == GPIO_TOGGLE)
-            Gpio_toggle(pin);
-        else
-            Gpio_clear(pin);
-    }
-}
-
-Gpio_Level OhiGrove_getDigital (Gpio_Pins pin)
-{    
-    if (pin != GPIO_PINS_NONE)
-        return Gpio_get(pin);
+    if (OhiGrove_Digital[connector].connector == connector)
+        return OhiGrove_Digital[connector].pin1;
     else
-        return 0;
+        return GPIO_PINS_NONE;
 }
-
-Ftm_Pins OhiGrove_getPwmPin (OhiGrove_Conn conn,
-                             OhiGrove_PinNumber number)
-{
-    Ftm_Pins pin = FTM_PINS_STOP;
-    
-#if defined (FRDMKL25Z)
-    
-    switch (conn)
-    {
-    case OHIGROVE_CONN_D2:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = FTM_PINS_PTD4;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = FTM_PINS_PTA12;
-
-        break;
-    case OHIGROVE_CONN_D3:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = FTM_PINS_PTA12;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = FTM_PINS_PTA4;
-
-        break;
-    case OHIGROVE_CONN_D4:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = FTM_PINS_PTA4;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = FTM_PINS_PTA5;
-        
-        break;
-    case OHIGROVE_CONN_D5:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = FTM_PINS_PTA5;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = FTM_PINS_PTC8;
-
-        break;
-    case OHIGROVE_CONN_D6:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = FTM_PINS_PTC8;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = FTM_PINS_PTC9;
-
-        break;
-    case OHIGROVE_CONN_D7:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = FTM_PINS_PTC9;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = FTM_PINS_PTA13;
-
-        break;
-    case OHIGROVE_CONN_D8:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            pin = FTM_PINS_PTA13;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            pin = FTM_PINS_PTD5;
-        
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-    
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-
-
-#endif
-    
-    return pin;
-}
-
-Ftm_Channels OhiGrove_getPwmChannel (OhiGrove_Conn conn,
-                                     OhiGrove_PinNumber number)
-{
-    Ftm_Channels channel;
-    
-#if defined (FRDMKL25Z)
-    
-    switch (conn)
-    {
-    case OHIGROVE_CONN_D2:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = FTM_CHANNELS_CH4;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = FTM_CHANNELS_CH0;
-
-        break;
-    case OHIGROVE_CONN_D3:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = FTM_CHANNELS_CH0;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = FTM_CHANNELS_CH1;
-
-        break;
-    case OHIGROVE_CONN_D4:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = FTM_CHANNELS_CH1;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = FTM_CHANNELS_CH2;
-        
-        break;
-    case OHIGROVE_CONN_D5:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = FTM_CHANNELS_CH2;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = FTM_CHANNELS_CH4;
-
-        break;
-    case OHIGROVE_CONN_D6:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = FTM_CHANNELS_CH4;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = FTM_CHANNELS_CH5;
-
-        break;
-    case OHIGROVE_CONN_D7:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = FTM_CHANNELS_CH5;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = FTM_CHANNELS_CH1;
-
-        break;
-    case OHIGROVE_CONN_D8:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            channel = FTM_CHANNELS_CH1;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            channel = FTM_CHANNELS_CH5;
-        
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-    
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-
-
-#endif
-    
-    return channel;
-}
-
-Ftm_DeviceHandle OhiGrove_getPwmDevice (OhiGrove_Conn conn,
-                                        OhiGrove_PinNumber number)
-{
-    Ftm_DeviceHandle dev;
-    
-#if defined (FRDMKL25Z)
-    
-    switch (conn)
-    {
-    case OHIGROVE_CONN_D2:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            dev = FTM0;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            dev = FTM1;
-
-        break;
-    case OHIGROVE_CONN_D3:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            dev = FTM1;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            dev = FTM0;
-
-        break;
-    case OHIGROVE_CONN_D4:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            dev = FTM0;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            dev = FTM0;
-        
-        break;
-    case OHIGROVE_CONN_D5:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            dev = FTM0;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            dev = FTM0;
-
-        break;
-    case OHIGROVE_CONN_D6:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            dev = FTM0;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            dev = FTM0;
-
-        break;
-    case OHIGROVE_CONN_D7:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            dev = FTM0;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            dev = FTM1;
-
-        break;
-    case OHIGROVE_CONN_D8:
-        
-        if (number == OHIGROVE_PIN_NUMBER_1)
-            dev = FTM1;
-        else if (number == OHIGROVE_PIN_NUMBER_2)
-            dev = FTM0;
-        
-        break;
-    default:
-        /* Nothing to do! */
-        break;
-    }
-    
-#elif defined (OHIBOARD_R1) && defined (GROVETOPPING_R0)
-
-
-#endif
-    
-    return dev;
-}
-
 

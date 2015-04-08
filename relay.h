@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #ifndef __RELAY_H
 #define __RELAY_H
 
@@ -48,3 +48,4 @@ void OhiGroveRelay_toggle (OhiGroveRelay_Device* dev);
 
 
 #endif /* __RELAY_H */
+#endif

@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #include "relay.h"
 
 void OhiGroveRelay_init (OhiGroveRelay_Device* dev)
@@ -54,3 +54,4 @@ void OhiGroveRelay_toggle (OhiGroveRelay_Device* dev)
     OhiGrove_setDigital(dev->pin,GPIO_TOGGLE);    
 }
 
+#endif

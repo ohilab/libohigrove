@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #ifndef __BUTTON_H
 #define __BUTTON_H
 
@@ -46,3 +46,4 @@ void OhiGroveButton_init (OhiGroveButton_Device* dev);
 Gpio_Level OhiGroveButton_get (OhiGroveButton_Device* dev);
 
 #endif /* __BUTTON_H */
+#endif

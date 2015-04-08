@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-
+#if 0
 #include "button.h"
 
 void OhiGroveButton_init (OhiGroveButton_Device* dev)
@@ -43,3 +43,4 @@ Gpio_Level OhiGroveButton_get (OhiGroveButton_Device* dev)
 {
     return OhiGrove_getDigital(dev->pin);
 }
+#endif

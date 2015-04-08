@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -35,32 +35,38 @@ void OhiGroveLed_init (OhiGroveLed_Device* dev)
 {
     if (dev->type == OHIGROVELED_TYPE_DIMMED)
     {
-        OhiGrove_enableConnector(dev->connector,
-                                 OHIGROVE_PIN_TYPE_PWM,
-                                 OHIGROVE_PIN_TYPE_NONE);
-//        dev->ftmPin = OhiGrove_getPwmPin(dev->connector,OHIGROVE_PIN_NUMBER_1);
-        dev->ftmChannel = OhiGrove_getPwmChannel(dev->connector,OHIGROVE_PIN_NUMBER_1);
-        dev->ftmDevice  = OhiGrove_getPwmDevice(dev->connector,OHIGROVE_PIN_NUMBER_1);
+//        OhiGrove_enableConnector(dev->connector,
+//                                 OHIGROVE_PIN_TYPE_PWM,
+//                                 OHIGROVE_PIN_TYPE_NONE);
+//        dev->ftmChannel = OhiGrove_getPwmChannel(dev->connector,OHIGROVE_PIN_NUMBER_1);
+//        dev->ftmDevice  = OhiGrove_getPwmDevice(dev->connector,OHIGROVE_PIN_NUMBER_1);
     }
     else
     {
-        OhiGrove_enableConnector(dev->connector,
-                                 OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT,
-                                 OHIGROVE_PIN_TYPE_NONE);
-        dev->pin = OhiGrove_getDigitalPin(dev->connector,OHIGROVE_PIN_NUMBER_1);        
+        dev->pin = OhiGrove_getDigitalPin(dev->connector);
+
+        if (dev->pin |= GPIO_PINS_NONE)
+        {
+            Gpio_config(dev->pin,GPIO_PINS_OUTPUT);
+        }
+        else
+        {
+            return; /* TODO: RETURN ERROR */
+        }
     }
 }
+
 
 void OhiGroveLed_on (OhiGroveLed_Device* dev)
 {
     if (dev->type == OHIGROVELED_TYPE_DIMMED)
     {
-        Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,(dev->dutyCycle / 100.0) * 32768);
-        dev->status = GPIO_HIGH;
+//        Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,(dev->dutyCycle / 100.0) * 32768);
+//        dev->status = GPIO_HIGH;
     }
     else
     {
-        OhiGrove_setDigital(dev->pin,GPIO_HIGH);
+        Gpio_set(dev->pin);
     }
 }
 
@@ -68,12 +74,12 @@ void OhiGroveLed_off (OhiGroveLed_Device* dev)
 {
     if (dev->type == OHIGROVELED_TYPE_DIMMED)
     {
-        Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,1);
-        dev->status = GPIO_LOW;
+//        Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,1);
+//        dev->status = GPIO_LOW;
     }
     else
     {
-        OhiGrove_setDigital(dev->pin,GPIO_LOW);    
+        Gpio_clear(dev->pin);
     }
 }
 
@@ -81,29 +87,29 @@ void OhiGroveLed_toggle (OhiGroveLed_Device* dev)
 {
     if (dev->type == OHIGROVELED_TYPE_DIMMED)
     {
-        if (dev->status == GPIO_HIGH)
-        {
-            Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,1);
-            dev->status = GPIO_LOW;
-        }
-        else
-        {
-            Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,(dev->dutyCycle / 100.0) * 32768);
-            dev->status = GPIO_HIGH;
-        }
+//        if (dev->status == GPIO_HIGH)
+//        {
+//            Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,1);
+//            dev->status = GPIO_LOW;
+//        }
+//        else
+//        {
+//            Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,(dev->dutyCycle / 100.0) * 32768);
+//            dev->status = GPIO_HIGH;
+//        }
     }
     else
     {
-        OhiGrove_setDigital(dev->pin,GPIO_TOGGLE);    
+        Gpio_toggle(dev->pin);
     }
 }
 
 void OhiGroveLed_setDuty(OhiGroveLed_Device* dev, uint8_t duty)
 {
-    if (duty > 100)
-        dev->dutyCycle = 100;
-    else
-        dev->dutyCycle = duty;
-        
-    Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,(dev->dutyCycle / 100.0) * 32768);
+//    if (duty > 100)
+//        dev->dutyCycle = 100;
+//    else
+//        dev->dutyCycle = duty;
+//
+//    Ftm_setPwm(dev->ftmDevice,dev->ftmChannel,(dev->dutyCycle / 100.0) * 32768);
 }
