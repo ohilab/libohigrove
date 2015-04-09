@@ -47,6 +47,6 @@ typedef struct _OhiGroveLightSensor_Device
 void OhiGroveLightSensor_init (OhiGroveLightSensor_Device* dev);
 
 uint16_t OhiGroveLightSensor_get (OhiGroveLightSensor_Device* dev);
-uint16_t OhiGroveLightSensor_getRaw (OhiGroveLightSensor_Device* dev);
+uint32_t OhiGroveLightSensor_getResistor (OhiGroveLightSensor_Device* dev);
 
 #endif /* __LIGHT_SENSOR_H */
