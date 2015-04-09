@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-#if 0
+
 #ifndef __BUTTON_H
 #define __BUTTON_H
 
@@ -46,4 +46,3 @@ void OhiGroveButton_init (OhiGroveButton_Device* dev);
 Gpio_Level OhiGroveButton_get (OhiGroveButton_Device* dev);
 
 #endif /* __BUTTON_H */
-#endif

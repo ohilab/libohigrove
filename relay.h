@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-#if 0
+
 #ifndef __RELAY_H
 #define __RELAY_H
 
@@ -38,14 +38,13 @@ typedef struct _OhiGroveRelay_Device
 {
     OhiGrove_Conn connector;
     Gpio_Pins pin;
+
 } OhiGroveRelay_Device;
 
-void OhiGroveRelay_init (OhiGroveRelay_Device* dev);
+void OhiGroveRelay_init   (OhiGroveRelay_Device* dev);
 
 void OhiGroveRelay_on     (OhiGroveRelay_Device* dev);
 void OhiGroveRelay_off    (OhiGroveRelay_Device* dev);
 void OhiGroveRelay_toggle (OhiGroveRelay_Device* dev);
 
-
 #endif /* __RELAY_H */
-#endif

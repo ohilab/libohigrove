@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-#if 0
+
 #ifndef __DIGITAL_OUT_H
 #define __DIGITAL_OUT_H
 
@@ -38,6 +38,7 @@ typedef struct _OhiGroveDigitalOut_Device
 {
     OhiGrove_Conn connector;
     Gpio_Pins pin;
+
 } OhiGroveDigitalOut_Device;
 
 void OhiGroveDigitalOut_init   (OhiGroveDigitalOut_Device* dev);
@@ -48,4 +49,4 @@ void OhiGroveDigitalOut_toggle (OhiGroveDigitalOut_Device* dev);
 
 
 #endif /* __DIGITAL_OUT_H */
-#endif
+

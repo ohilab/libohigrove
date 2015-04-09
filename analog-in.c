@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -28,27 +28,30 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-#if 0
+
 #include "analog-in.h"
 
 void OhiGroveAnalogIn_init (OhiGroveAnalogIn_Device* dev)
 {
-    OhiGrove_enableConnector(dev->connector,
-                             OHIGROVE_PIN_TYPE_ANALOG_INPUT,
-                             OHIGROVE_PIN_TYPE_NONE);
-    
     dev->pin = OhiGrove_getAnalogPin(dev->connector,OHIGROVE_PIN_NUMBER_1);
-    dev->adcDevice = OhiGrove_getAnalogDevice(dev->connector,OHIGROVE_PIN_NUMBER_1);
-    dev->channel = OhiGrove_getAnalogChannel(dev->connector,OHIGROVE_PIN_NUMBER_1);
+    
+    if (dev->pin != ADC_PINS_NONE)
+    {
+    	dev->device = OhiGrove_getAnalogDevice(dev->connector,OHIGROVE_PIN_NUMBER_1);
+    	dev->channel = OhiGrove_getAnalogChannel(dev->connector,OHIGROVE_PIN_NUMBER_1);
 
+        Adc_enablePin(dev->device,dev->pin);
+    }
+    else
+    {
+    	return; /* TODO: add errors! */
+    }
 }
 
 uint16_t OhiGroveAnalogIn_get (OhiGroveAnalogIn_Device* dev)
 {
     uint16_t result;
-    Adc_readValue(dev->adcDevice,dev->channel,&result);
-    
+
+    Adc_readValue(dev->device,dev->channel,&result);
     return result;
 }
-
-#endif

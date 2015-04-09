@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -28,31 +28,35 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-#if 0
+
 #include "buzzer.h"
 
 void OhiGroveBuzzer_init (OhiGroveBuzzer_Device* dev)
 {
-    OhiGrove_enableConnector(dev->connector,
-                             OHIGROVE_PIN_TYPE_DIGITAL_OUTPUT,
-                             OHIGROVE_PIN_TYPE_NONE);
-    dev->pin = OhiGrove_getDigitalPin(dev->connector,OHIGROVE_PIN_NUMBER_1);
+    dev->pin = OhiGrove_getDigitalPin(dev->connector);
 
+    if (dev->pin != GPIO_PINS_NONE)
+    {
+        Gpio_config(dev->pin,GPIO_PINS_OUTPUT);
+    }
+    else
+    {
+        return; /* TODO: RETURN ERROR */
+    }
 }
 
 void OhiGroveBuzzer_on (OhiGroveBuzzer_Device* dev)
 {
-    OhiGrove_setDigital(dev->pin,GPIO_HIGH);
+	Gpio_set(dev->pin);
 }
 
 void OhiGroveBuzzer_off (OhiGroveBuzzer_Device* dev)
 {
-    OhiGrove_setDigital(dev->pin,GPIO_LOW);    
+	Gpio_clear(dev->pin);
 }
 
 void OhiGroveBuzzer_toggle (OhiGroveBuzzer_Device* dev)
 {
-    OhiGrove_setDigital(dev->pin,GPIO_TOGGLE);    
+	Gpio_toggle(dev->pin);
 }
 
-#endif

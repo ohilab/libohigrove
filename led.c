@@ -45,7 +45,7 @@ void OhiGroveLed_init (OhiGroveLed_Device* dev)
     {
         dev->pin = OhiGrove_getDigitalPin(dev->connector);
 
-        if (dev->pin |= GPIO_PINS_NONE)
+        if (dev->pin != GPIO_PINS_NONE)
         {
             Gpio_config(dev->pin,GPIO_PINS_OUTPUT);
         }

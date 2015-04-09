@@ -36,6 +36,8 @@
 
 #include "libohiboard.h"
 
+#define OHIGROVE_ADC_MAX_VALUE             4096
+
 typedef enum _OhiGrove_Board
 {
     OHIGROVE_BOARD_FRDMKL25,
@@ -99,6 +101,10 @@ void OhiGrove_initBoard();
 
 void OhiGrove_delay (uint32_t msDelay);
 
-Gpio_Pins OhiGrove_getDigitalPin(OhiGrove_Conn connector);
+Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn connector);
+
+Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn connector, OhiGrove_PinNumber number);
+Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn connector, OhiGrove_PinNumber number);
+Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_PinNumber number);
 
 #endif /* __OHIGROVE_H */

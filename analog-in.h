@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-#if 0
+
 #ifndef __ANALOG_IN_H
 #define __ANALOG_IN_H
 
@@ -40,7 +40,7 @@ typedef struct _OhiGroveAnalogIn_Device
 
     Adc_Pins pin;
     Adc_ChannelNumber channel;
-    Adc_DeviceHandle adcDevice;
+    Adc_DeviceHandle device;
 
 } OhiGroveAnalogIn_Device;
 
@@ -48,5 +48,4 @@ void OhiGroveAnalogIn_init (OhiGroveAnalogIn_Device* dev);
 
 uint16_t OhiGroveAnalogIn_get (OhiGroveAnalogIn_Device* dev);
 
-#endif /* __BUZZER_H */
-#endif
+#endif /* __ANALOG_IN_H */

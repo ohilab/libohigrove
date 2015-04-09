@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2015 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -28,19 +28,24 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-#if 0
+
 #include "button.h"
 
 void OhiGroveButton_init (OhiGroveButton_Device* dev)
 {
-    OhiGrove_enableConnector(dev->connector,
-                             OHIGROVE_PIN_TYPE_DIGITAL_INPUT,
-                             OHIGROVE_PIN_TYPE_NONE);
-    dev->pin = OhiGrove_getDigitalPin(dev->connector,OHIGROVE_PIN_NUMBER_1);
+    dev->pin = OhiGrove_getDigitalPin(dev->connector);
+
+    if (dev->pin != GPIO_PINS_NONE)
+    {
+        Gpio_config(dev->pin,GPIO_PINS_INPUT);
+    }
+    else
+    {
+        return; /* TODO: RETURN ERROR */
+    }
 }
 
 Gpio_Level OhiGroveButton_get (OhiGroveButton_Device* dev)
 {
-    return OhiGrove_getDigital(dev->pin);
+    return Gpio_get(dev->pin);
 }
-#endif

@@ -28,7 +28,7 @@
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
-#if 0
+
 #ifndef __BUZZER_H
 #define __BUZZER_H
 
@@ -38,6 +38,7 @@ typedef struct _OhiGroveBuzzer_Device
 {
     OhiGrove_Conn connector;
     Gpio_Pins pin;
+
 } OhiGroveBuzzer_Device;
 
 void OhiGroveBuzzer_init (OhiGroveBuzzer_Device* dev);
@@ -48,4 +49,3 @@ void OhiGroveBuzzer_toggle (OhiGroveBuzzer_Device* dev);
 
 
 #endif /* __BUZZER_H */
-#endif

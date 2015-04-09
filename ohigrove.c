@@ -40,32 +40,82 @@ typedef struct
 
     Gpio_Pins pin1;
     Gpio_Pins pin2;
+
 } OhiGrove_DigitalConnector;
 
 const OhiGrove_DigitalConnector OhiGrove_Digital[] =
 {
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
-    {OHIGROVE_CONN_UART, GPIO_PINS_PTA1, GPIO_PINS_PTA2},
-    {OHIGROVE_CONN_D2,   GPIO_PINS_PTD4, GPIO_PINS_PTA12},
+    {OHIGROVE_CONN_UART, GPIO_PINS_PTA1,  GPIO_PINS_PTA2},
+    {OHIGROVE_CONN_D2,   GPIO_PINS_PTD4,  GPIO_PINS_PTA12},
+    {OHIGROVE_CONN_D3,   GPIO_PINS_PTA12, GPIO_PINS_PTA4},
+    {OHIGROVE_CONN_D4,   GPIO_PINS_PTA4,  GPIO_PINS_PTA5},
+    {OHIGROVE_CONN_D5,   GPIO_PINS_PTA5,  GPIO_PINS_PTC8},
+    {OHIGROVE_CONN_D6,   GPIO_PINS_PTC8,  GPIO_PINS_PTC9},
+    {OHIGROVE_CONN_D7,   GPIO_PINS_PTC9,  GPIO_PINS_PTA13},
+    {OHIGROVE_CONN_D8,   GPIO_PINS_PTA13, GPIO_PINS_PTD5},
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
 #endif
 };
 
+typedef struct
+{
+    OhiGrove_Conn connector;   /*< The grove connector of the shield/topping */
+
+    Adc_Pins pin1;
+    Adc_ChannelNumber pin1Channel;
+    uint8_t pin1Device;
+
+    Adc_Pins pin2;
+    Adc_ChannelNumber pin2Channel;
+    uint8_t pin2Device;
+
+} OhiGrove_AnalogConnector;
+
+static OhiGrove_AnalogConnector OhiGrove_Analog[] =
+{
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
-    Clock_Config OhiGrove_clockConfig = {
-        .source = CLOCK_CRYSTAL,
-        .fext = 8000000,
-        .foutSys = 40000000,
-        .busDivider = 2,
-    };
+    {OHIGROVE_CONN_A0, ADC_PINS_PTB0, ADC_CH_SE8,  0, ADC_PINS_PTB1, ADC_CH_SE9,  0},
+    {OHIGROVE_CONN_A1, ADC_PINS_PTB1, ADC_CH_SE9,  0, ADC_PINS_PTB2, ADC_CH_SE12, 0},
+    {OHIGROVE_CONN_A2, ADC_PINS_PTB2, ADC_CH_SE12, 0, ADC_PINS_PTB3, ADC_CH_SE13, 0},
+    {OHIGROVE_CONN_A3, ADC_PINS_PTB3, ADC_CH_SE13, 0, ADC_PINS_PTC2, ADC_CH_SE11, 0},
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
 #endif
+};
+
+#define OHIGROVE_DIGITAL_SIZE    ( sizeof OhiGrove_Digital / sizeof OhiGrove_Digital[0] )
+#define OHIGROVE_ANALOG_SIZE     ( sizeof OhiGrove_Analog / sizeof OhiGrove_Analog[0] )
+
+
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+
+Clock_Config OhiGrove_clockConfig = {
+	.source = CLOCK_CRYSTAL,
+	.fext = 8000000,
+	.foutSys = 40000000,
+	.busDivider = 2,
+};
+
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+#endif
+
+static Adc_Config OhiGrove_adcConfig = {
+	.clkDiv             = 1,
+	.clkSource          = ADC_BUS_CLOCK,
+	.sampleLength       = ADC_LONG_SAMPLE_2,
+	.covertionSpeed     = ADC_NORMAL_CONVERTION,
+	.resolution         = ADC_RESOLUTION_12BIT,
+	.average            = ADC_AVERAGE_1_SAMPLES,
+	.contConv           = ADC_SINGLE_CONVERTION,
+	.voltRef            = ADC_VREF,
+};
 
 //static Ftm_Config OhiGrove_highFrequency =
 //{
@@ -139,6 +189,8 @@ void OhiGrove_initBoard ()
     Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
     OhiGrove_milliseconds = 0;
 
+    Adc_init(ADC0,&OhiGrove_adcConfig);
+
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
     
 #endif
@@ -152,3 +204,68 @@ Gpio_Pins OhiGrove_getDigitalPin(OhiGrove_Conn connector)
         return GPIO_PINS_NONE;
 }
 
+Adc_Pins OhiGrove_getAnalogPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)
+{
+	uint8_t i = 0;
+
+	for (i = 0; i < OHIGROVE_ANALOG_SIZE; ++i)
+	{
+	    if (OhiGrove_Analog[i].connector == connector)
+	    {
+	    	if (number == OHIGROVE_PIN_NUMBER_1)
+	    		return OhiGrove_Analog[i].pin1;
+	    	else
+	    		return OhiGrove_Analog[i].pin2;
+	    }
+	}
+	return ADC_PINS_NONE;
+}
+
+Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn connector, OhiGrove_PinNumber number)
+{
+	uint8_t i = 0;
+
+	for (i = 0; i < OHIGROVE_ANALOG_SIZE; ++i)
+	{
+	    if (OhiGrove_Analog[i].connector == connector)
+	    {
+	    	if (number == OHIGROVE_PIN_NUMBER_1)
+	    		return OhiGrove_Analog[i].pin1Channel;
+	    	else
+	    		return OhiGrove_Analog[i].pin2Channel;
+	    }
+	}
+	return ADC_CH_DISABLE;
+}
+
+Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_PinNumber number)
+{
+	uint8_t i = 0;
+	uint8_t device = 0;
+
+	for (i = 0; i < OHIGROVE_ANALOG_SIZE; ++i)
+	{
+	    if (OhiGrove_Analog[i].connector == connector)
+	    {
+	    	if (number == OHIGROVE_PIN_NUMBER_1)
+	    		device = OhiGrove_Analog[i].pin1Device;
+	    	else
+	    		device = OhiGrove_Analog[i].pin2Device;
+
+	    	switch (device)
+	    	{
+	    	case 0:
+	    		return ADC0;
+#if defined (LIBOHIBOARD_OHIBOARD_R1)
+	    	case 1:
+	    		return ADC1;
+	    	case 2:
+	    		return ADC2;
+#endif
+	    	default:
+	    		return NULL;
+	    	}
+	    }
+	}
+	return NULL;
+}
