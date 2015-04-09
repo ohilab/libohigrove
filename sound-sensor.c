@@ -24,14 +24,14 @@
  ******************************************************************************/
 
 /**
- * @file libohigrove/light-sensor.c
+ * @file libohigrove/sound-sensor.c
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @brief 
  */
 
-#include "light-sensor.h"
+#include "sound-sensor.h"
 
-void OhiGroveLightSensor_init (OhiGroveLightSensor_Device* dev)
+void OhiGroveSoundSensor_init (OhiGroveSoundSensor_Device* dev)
 {
     dev->pin = OhiGrove_getAnalogPin(dev->connector,OHIGROVE_PIN_NUMBER_1);
     
@@ -48,7 +48,7 @@ void OhiGroveLightSensor_init (OhiGroveLightSensor_Device* dev)
     }
 }
 
-uint16_t OhiGroveLightSensor_getRaw (OhiGroveLightSensor_Device* dev)
+uint16_t OhiGroveSoundSensor_get (OhiGroveSoundSensor_Device* dev)
 {
     uint16_t result;
 
@@ -56,16 +56,3 @@ uint16_t OhiGroveLightSensor_getRaw (OhiGroveLightSensor_Device* dev)
 
     return result;
 }
-
-uint16_t OhiGroveLightSensor_get (OhiGroveLightSensor_Device* dev)
-{
-    uint16_t result;
-    uint16_t resistor;
-
-    Adc_readValue(dev->device,dev->channel,&result);
-    resistor = (uint16_t) (((uint16_t)(OHIGROVE_ADC_MAX_VALUE - result) * 10) / result);
-
-    return resistor;
-}
-
-
