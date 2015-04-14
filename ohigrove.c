@@ -58,6 +58,18 @@ const OhiGrove_DigitalConnector OhiGrove_Digital[] =
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
+    {OHIGROVE_CONN_UART1,   UART_PINS_PTB10,  UART_PINS_PTB11},
+    {OHIGROVE_CONN_UART2,   UART_PINS_PTB16,  UART_PINS_PTB17},
+    {OHIGROVE_CONN_UART3,   UART_PINS_PTC14,  UART_PINS_PTC15},
+    {OHIGROVE_CONN_D1,   GPIO_PINS_PTC1,  GPIO_PINS_PTC2},
+    {OHIGROVE_CONN_D2,   GPIO_PINS_PTC3,  GPIO_PINS_PTC4},
+    {OHIGROVE_CONN_D3,   GPIO_PINS_PTD2,  GPIO_PINS_PTD3},
+    {OHIGROVE_CONN_D4,   GPIO_PINS_PTD4,  GPIO_PINS_PTD7},
+    {OHIGROVE_CONN_D5,   GPIO_PINS_PTA12,  GPIO_PINS_PTA13},
+    {OHIGROVE_CONN_D6,   GPIO_PINS_PTB18,  GPIO_PINS_PTB19},
+    {OHIGROVE_CONN_I2C1,   IIC_PINS_PTB2,  IIC_PINS_PTB3},
+    {OHIGROVE_CONN_I2C2,   IIC_PINS_PTC10,  IIC_PINS_PTC11},
+
 #endif
 };
 
@@ -86,6 +98,11 @@ static OhiGrove_AnalogConnector OhiGrove_Analog[] =
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
+    {OHIGROVE_CONN_A1, ADC_PINS_ADC0_DP1, ADC_CH_DP1,  0,  0,  0,  0},
+    {OHIGROVE_CONN_A2, ADC_PINS_ADC1_DP1, ADC_CH_DP1,  1,  0,  0,  0},
+    {OHIGROVE_CONN_A3, ADC_PINS_ADC0_DP0, ADC_CH_DP0,  0,  0,  0,  0},
+    {OHIGROVE_CONN_A4, ADC_PINS_ADC1_DP0, ADC_CH_DP0,  1,  0,  0,  0},
+
 #endif
 };
 
@@ -104,6 +121,15 @@ Clock_Config OhiGrove_clockConfig = {
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
+Clock_Config OhiGrove_clockConfig = {
+		.source = CLOCK_CRYSTAL,
+		.fext = 16000000,
+		.foutSys = 100000000,
+		.busDivider = 2,
+		.flexbusDivider = 2,
+		.flashDivider = 4,
+};
+
 #endif
 
 static Adc_Config OhiGrove_adcConfig = {
@@ -115,6 +141,17 @@ static Adc_Config OhiGrove_adcConfig = {
 	.average            = ADC_AVERAGE_1_SAMPLES,
 	.contConv           = ADC_SINGLE_CONVERTION,
 	.voltRef            = ADC_VREF,
+};
+
+static Iic_Config OhiGrove_IicConfig = {
+    .sclPin = IIC_PINS_SCLNONE,
+    .sdaPin = IIC_PINS_SDANONE,
+
+    .baudRate = 100000,
+    .devType = IIC_MASTER_MODE,
+    .addressMode = IIC_SEVEN_BIT,
+
+//    .sclTimeout = ,
 };
 
 //static Ftm_Config OhiGrove_highFrequency =
@@ -193,6 +230,23 @@ void OhiGrove_initBoard ()
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
     
+	SIM_SCGC5 |= (
+			SIM_SCGC5_PORTA_MASK |
+			SIM_SCGC5_PORTB_MASK |
+			SIM_SCGC5_PORTC_MASK |
+			SIM_SCGC5_PORTD_MASK |
+			SIM_SCGC5_PORTE_MASK);
+
+	errors = Clock_Init(&OhiGrove_clockConfig);
+    errors = Clock_setDividers(OhiGrove_clockConfig.busDivider, OhiGrove_clockConfig.flexbusDivider, OhiGrove_clockConfig.flashDivider);
+	foutSYS = Clock_getFrequency(CLOCK_SYSTEM);
+    foutBUS = Clock_getFrequency(CLOCK_BUS);
+
+//    Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
+//    OhiGrove_milliseconds = 0;
+//
+//    Adc_init(ADC0,&OhiGrove_adcConfig);
+
 #endif
 }
 
@@ -202,6 +256,53 @@ Gpio_Pins OhiGrove_getDigitalPin(OhiGrove_Conn connector)
         return OhiGrove_Digital[connector].pin1;
     else
         return GPIO_PINS_NONE;
+}
+
+static Iic_SclPins OhiGrove_getIicSclPin (OhiGrove_Conn connector)
+{
+    if (OhiGrove_Digital[connector].connector == connector)
+        return OhiGrove_Digital[connector].pin1;
+    else
+        return IIC_PINS_SCLNONE;
+}
+
+static Iic_SdaPins OhiGrove_getIicSdaPin (OhiGrove_Conn connector)
+{
+    if (OhiGrove_Digital[connector].connector == connector)
+        return OhiGrove_Digital[connector].pin2;
+    else
+    	return IIC_PINS_SDANONE;
+}
+
+static Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector)
+{
+
+	switch (connector)
+	{
+#if defined (LIBOHIBOARD_OHIBOARD_R1)
+	case 9:
+		return IIC0;
+	case 10:
+		return IIC1;
+#endif
+	default:
+	    return NULL;
+	}
+
+	return NULL;
+}
+
+System_Errors OhiGrove_IicEnable (OhiGrove_Conn connector, uint32_t baudrate)
+{
+	Iic_DeviceHandle device = NULL;
+
+	device = OhiGrove_getIicDevice(connector);
+	OhiGrove_IicConfig.sclPin = OhiGrove_getIicSclPin(connector);
+	OhiGrove_IicConfig.sdaPin = OhiGrove_getIicSdaPin(connector);
+	if (baudrate != 0)
+		OhiGrove_IicConfig.baudRate = (baudrate);
+
+	return Iic_init(device, &OhiGrove_IicConfig);
 }
 
 Adc_Pins OhiGrove_getAnalogPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)
@@ -259,8 +360,8 @@ Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_Pin
 #if defined (LIBOHIBOARD_OHIBOARD_R1)
 	    	case 1:
 	    		return ADC1;
-	    	case 2:
-	    		return ADC2;
+//	    	case 2:
+//	    		return ADC2;
 #endif
 	    	default:
 	    		return NULL;
