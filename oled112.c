@@ -2,7 +2,6 @@
  * Copyright (C) 2015 A. C. Open Hardware Ideas Lab
  *
  * Authors:
- *  Marco Giammarini <m.giammarini@warcomeb.it>
  *  Alessio Paolucci <a.paolucci89@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,12 +31,45 @@
 
 #include "oled112.h"
 
-// 8x8 Font ASCII 32 - 127 Implemented
-// Users can modify this to support more characters(glyphs)
-// BasicFont is placed in code memory.
+#define OHIGROVEOLED112_ADDRESS     0x78
 
-// This font be freely used without any restriction(It is placed in public domain)
-const unsigned char OhiGroveOled112_BasicFont[][8] =
+
+#define OHIGROVEOLED112_MAX_X       127
+#define OHIGROVEOLED112_MAX_Y       63
+
+typedef enum
+{
+	OHIGROVEOLED112_CMD_COMMAND_MODE      = 0x80,
+	OHIGROVEOLED112_CMD_DATA_MODE         = 0x40,
+	OHIGROVEOLED112_CMD_DISPLAY_OFF       = 0xAE,
+	OHIGROVEOLED112_CMD_DISPLAY_ON        = 0xAF,
+	OHIGROVEOLED112_CMD_NORMAL_DISPLAY    = 0xA6,
+	OHIGROVEOLED112_CMD_INVERSE_DISPLAY   = 0xA7,
+	OHIGROVEOLED112_CMD_ACTIVATE_SCROLL   = 0x2F,
+	OHIGROVEOLED112_CMD_DEACTIVATE_SCROLL = 0x2E,
+	OHIGROVEOLED112_CMD_SET_BRIGHTNESS    = 0x81,
+    OHIGROVEOLED112_CMD_ADDRESS_MODE      = 0x20,
+
+} OhiGroveOled112_Command;
+
+typedef enum
+{
+    OHIGROVEOLED112_ADDRESSMODE_HORIZONTAL = 0x00,
+    OHIGROVEOLED112_ADDRESSMODE_PAGE       = 0x02,
+
+} OhiGroveOled112_AddressMode;
+
+
+static OhiGroveOled112_AddressMode OhiGroveOled112_addressMode;
+
+/*
+ * This font be freely used without any restriction(It is placed in public domain)
+ *
+ * 8x8 Font ASCII 32 - 127 Implemented
+ * Users can modify this to support more characters(glyphs)
+ * BasicFont is placed in code memory.
+ */
+const unsigned char OhiGroveOled112_basicFont[][8] =
 {
   {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
   {0x00,0x00,0x5F,0x00,0x00,0x00,0x00,0x00},
@@ -137,257 +169,136 @@ const unsigned char OhiGroveOled112_BasicFont[][8] =
   {0x00,0x02,0x05,0x05,0x02,0x00,0x00,0x00}
 };
 
+static void OhiGroveOled112_sendCommand (OhiGroveOled112_Device* dev, OhiGroveOled112_Command command)
+{
+	Iic_start(dev->device);
+	Iic_writeByte(dev->device, OHIGROVEOLED112_ADDRESS);
+	Iic_writeByte(dev->device, OHIGROVEOLED112_CMD_COMMAND_MODE);
+	Iic_writeByte(dev->device, command);
+	Iic_stop(dev->device);
+}
+
+static void OhiGroveOled112_sendData (OhiGroveOled112_Device* dev, uint8_t data)
+{
+	Iic_start(dev->device);
+	Iic_writeByte(dev->device, OHIGROVEOLED112_ADDRESS);
+	Iic_writeByte(dev->device, OHIGROVEOLED112_CMD_DATA_MODE);
+	Iic_writeByte(dev->device, data);
+	Iic_stop(dev->device);
+}
+
 void OhiGroveOled112_init(OhiGroveOled112_Device* dev)
 {
-	System_Errors errors = ERRORS_NO_ERROR;
+    System_Errors errors = ERRORS_NO_ERROR;
 
-	errors = OhiGrove_IicEnable(dev->connector, dev->baudrate);
+    dev->device = OhiGrove_getIicDevice(dev->connector);
+    errors = OhiGrove_iicEnable(dev->connector, dev->baudrate);
 
-	OhiGroveOled112_sendCommand(OhiGroveOled112_Display_Off_Cmd); 	//display off
-	OhiGroveOled112_sendCommand(OhiGroveOled112_Display_On_Cmd); 	//display on
-	OhiGroveOled112_sendCommand(OhiGroveOled112_Normal_Display_Cmd);  //Set Normal Display (default)
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_DISPLAY_OFF);
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_DISPLAY_ON);
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_NORMAL_DISPLAY);
 }
 
-void OhiGroveOled112_sendCommand(unsigned char command)
+void OhiGroveOled112_setBrightness(OhiGroveOled112_Device* dev, uint8_t brightness)
 {
-	Iic_start(OLED35046P_DEV);
-	Iic_writeByte(OLED35046P_DEV, OhiGroveOled112_Address);
-	Iic_writeByte(OLED35046P_DEV, OhiGroveOled112_Command_Mode);
-	Iic_writeByte(OLED35046P_DEV, command);
-	Iic_stop(OLED35046P_DEV);
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_SET_BRIGHTNESS);
+    OhiGroveOled112_sendCommand(dev,brightness);
 }
 
-void OhiGroveOled112_setBrightness(unsigned char Brightness)
+void OhiGroveOled112_setHorizontalMode(OhiGroveOled112_Device* dev)
 {
-	OhiGroveOled112_sendCommand(OhiGroveOled112_Set_Brightness_Cmd);
-	OhiGroveOled112_sendCommand(Brightness);
+    OhiGroveOled112_addressMode = OHIGROVEOLED112_ADDRESSMODE_HORIZONTAL;
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_ADDRESS_MODE);
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_ADDRESSMODE_HORIZONTAL);
 }
 
-void OhiGroveOled112_setHorizontalMode()
+void OhiGroveOled112_setPageMode(OhiGroveOled112_Device* dev)
 {
-	OhiGroveOled112_addressingMode = OHIGROVEOLED112_HORIZONTAL_MODE;
-	OhiGroveOled112_sendCommand(0x20); 			//set addressing mode
-	OhiGroveOled112_sendCommand(0x00); 			//set horizontal addressing mode
+    OhiGroveOled112_addressMode = OHIGROVEOLED112_ADDRESSMODE_PAGE,
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_ADDRESS_MODE);
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_ADDRESSMODE_PAGE);
 }
 
-void OhiGroveOled112_setPageMode()
+void OhiGroveOled112_setTextXY(OhiGroveOled112_Device* dev, uint8_t row, uint8_t column)
 {
-	OhiGroveOled112_addressingMode = OHIGROVEOLED112_PAGE_MODE;
-	OhiGroveOled112_sendCommand(0x20); 			//set addressing mode
-	OhiGroveOled112_sendCommand(0x02); 			//set page addressing mode
+    OhiGroveOled112_sendCommand(dev,0xB0 + row);
+    OhiGroveOled112_sendCommand(dev,0x00 + (8*column & 0x0F));    // set column lower address
+    OhiGroveOled112_sendCommand(dev,0x10 + ((8*column>>4)&0x0F)); // set column higher address
 }
 
-
-void OhiGroveOled112_setTextXY(unsigned char Row, unsigned char Column)
+void OhiGroveOled112_clearDisplay(OhiGroveOled112_Device* dev)
 {
-	OhiGroveOled112_sendCommand(0xB0 + Row); 			//set page address
-	OhiGroveOled112_sendCommand(0x00 + (8*Column & 0x0F)); 	//set column lower address
-	OhiGroveOled112_sendCommand(0x10 + ((8*Column>>4)&0x0F)); 	//set column higher address
-}
-
-
-void OhiGroveOled112_clearDisplay()
-{
-    unsigned char i,j;
-    OhiGroveOled112_sendCommand(OhiGroveOled112_Display_Off_Cmd); 	//display off
-    for(j=0;j<8;j++)
+    uint8_t i,j;
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_DISPLAY_OFF);
+    for (j=0; j<8; j++)
     {
-    	OhiGroveOled112_setTextXY(j,0);
+        OhiGroveOled112_setTextXY(dev,j,0);
+        for(i=0; i<16; i++)
         {
-            for(i=0;i<16;i++)  //clear all columns
-            {
-            	OhiGroveOled112_putChar(' ');
-            }
+            OhiGroveOled112_putChar(dev,' ');
         }
     }
-    OhiGroveOled112_sendCommand(OhiGroveOled112_Display_On_Cmd); 	//display on
-    OhiGroveOled112_setTextXY(0,0);
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_DISPLAY_ON);
+    OhiGroveOled112_setTextXY(dev,0,0);
 }
 
-void OhiGroveOled112_sendData(unsigned char Data)
+void OhiGroveOled112_putChar(OhiGroveOled112_Device* dev, uint8_t c)
 {
-	Iic_start(OLED35046P_DEV);
-	Iic_writeByte(OLED35046P_DEV, OhiGroveOled112_Address);
-	Iic_writeByte(OLED35046P_DEV, OhiGroveOled112_Data_Mode);
-	Iic_writeByte(OLED35046P_DEV, Data);
-	Iic_stop(OLED35046P_DEV);
-}
+    uint8_t i = 0;
 
-void OhiGroveOled112_putChar(unsigned char C)
-{
-    if(C < 32 || C > 127) //Ignore non-printable ASCII characters. This can be modified for multilingual font.
+    /* Ignore non-printable ASCII characters. This can be modified for multilingual font. */
+    if (c < 32 || c > 127)
+        c=' ';
+
+    for (i=0; i<8; i++)
     {
-    C=' '; //Space
-    }
-    unsigned char i=0;
-    for(i=0;i<8;i++)
-    {
-       //read bytes from code memory
-    	OhiGroveOled112_sendData(OhiGroveOled112_BasicFont[C-32][i]); //font array starts at 0, ASCII starts at 32. Hence the translation
+    	OhiGroveOled112_sendData(dev,OhiGroveOled112_basicFont[c-32][i]);
     }
 }
 
-void OhiGroveOled112_putString(const char *String)
+void OhiGroveOled112_putString(OhiGroveOled112_Device* dev, const char* text)
 {
-    unsigned char i=0;
-    while(String[i])
+    if (text)
     {
-    	OhiGroveOled112_putChar(String[i]);
-        i++;
+        while (*text)
+        {
+            OhiGroveOled112_putChar(dev, *text++);
+        }
     }
 }
 
-unsigned char OhiGroveOled112_putNumber(long long_num)
+void OhiGroveOled112_drawBitmap(OhiGroveOled112_Device* dev, const uint8_t* bitmaparray, uint16_t bytes)
 {
-  unsigned char char_buffer[10]="";
-  unsigned char i = 0;
-  unsigned char f = 0;
+    uint16_t i;
+    OhiGroveOled112_AddressMode addressMode;
 
-  if (long_num < 0)
-  {
-    f=1;
-    OhiGroveOled112_putChar('-');
-    long_num = -long_num;
-  }
-  else if (long_num == 0)
-  {
-    f=1;
-    OhiGroveOled112_putChar('0');
-    return f;
-  }
+    addressMode = OhiGroveOled112_addressMode;
+    if(addressMode != OHIGROVEOLED112_ADDRESSMODE_HORIZONTAL)
+    {
+        //Bitmap is drawn in horizontal mode
+        OhiGroveOled112_setHorizontalMode(dev);
+    }
 
-  while (long_num > 0)
-  {
-    char_buffer[i++] = long_num % 10;
-    long_num /= 10;
-  }
+    for (i=0; i<bytes; i++)
+    {
+        OhiGroveOled112_sendData(dev,bitmaparray[i]);
+    }
 
-  f=f+i;
-  for(; i > 0; i--)
-  {
-	  OhiGroveOled112_putChar('0'+ char_buffer[i - 1]);
-  }
-  return f;
-
+    if(addressMode == OHIGROVEOLED112_ADDRESSMODE_PAGE)
+    {
+        // If page mode was used earlier, restore it.
+        OhiGroveOled112_setPageMode(dev);
+    }
 }
 
-unsigned char OhiGroveOled112_putFloat(float floatNumber,unsigned char decimal)
+void OhiGroveOled112_setNormalDisplay(OhiGroveOled112_Device* dev)
 {
-  unsigned int temp=0;
-  float decy=0.0;
-  float rounding = 0.5;
-  unsigned char f=0;
-  if(floatNumber<0.0)
-  {
-	  OhiGroveOled112_putString("-");
-      floatNumber = -floatNumber;
-      f +=1;
-  }
-  for (unsigned char i=0; i<decimal; ++i)
-  {
-      rounding /= 10.0;
-  }
-      floatNumber += rounding;
-
-  temp = floatNumber;
-  f += OhiGroveOled112_putNumber(temp);
-  if(decimal>0)
-  {
-	  OhiGroveOled112_putChar('.');
-      f +=1;
- }
-  decy = floatNumber-temp;//decimal part,
-  for(unsigned char i=0;i<decimal;i++)//4
-  {
-      decy *=10;// for the next decimal
-      temp = decy;//get the decimal
-      OhiGroveOled112_putNumber(temp);
-      decy -= temp;
-  }
-  f +=decimal;
-  return f;
+	OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_NORMAL_DISPLAY);
 }
 
-void OhiGroveOled112_drawBitmap(unsigned char *bitmaparray,int bytes)
+void OhiGroveOled112_setInverseDisplay(OhiGroveOled112_Device* dev)
 {
-  char localAddressMode = OhiGroveOled112_addressingMode;
-  if(OhiGroveOled112_addressingMode != OHIGROVEOLED112_HORIZONTAL_MODE)
-  {
-      //Bitmap is drawn in horizontal mode
-	  OhiGroveOled112_setHorizontalMode();
-  }
-
-  for(int i=0;i<bytes;i++)
-  {
-	  OhiGroveOled112_sendData(bitmaparray[i]);
-  }
-
-  if(localAddressMode == OHIGROVEOLED112_PAGE_MODE)
-  {
-      //If pageMode was used earlier, restore it.
-	  OhiGroveOled112_setPageMode();
-  }
-
-}
-
-void OhiGroveOled112_setHorizontalScrollProperties(bool direction,unsigned char startPage, unsigned char endPage, unsigned char scrollSpeed)
-{
-/*
-Use the following defines for 'direction' :
-
- OhiGroveOled112_Scroll_Left
- OhiGroveOled112_Scroll_Right
-
-Use the following defines for 'scrollSpeed' :
-
- OhiGroveOled112_Scroll_2Frames
- OhiGroveOled112_Scroll_3Frames
- OhiGroveOled112_Scroll_4Frames
- OhiGroveOled112_Scroll_5Frames
- OhiGroveOled112_Scroll_25Frames
- OhiGroveOled112_Scroll_64Frames
- OhiGroveOled112_Scroll_128Frames
- OhiGroveOled112_Scroll_256Frames
-
-*/
-
-   if(OhiGroveOled112_Scroll_Right == direction)
-   {
-       //Scroll Right
-	   OhiGroveOled112_sendCommand(0x26);
-   }
-   else
-   {
-       //Scroll Left
-	   OhiGroveOled112_sendCommand(0x27);
-
-   }
-   OhiGroveOled112_sendCommand(0x00);
-   OhiGroveOled112_sendCommand(startPage);
-   OhiGroveOled112_sendCommand(scrollSpeed);
-   OhiGroveOled112_sendCommand(endPage);
-   OhiGroveOled112_sendCommand(0x00);
-   OhiGroveOled112_sendCommand(0xFF);
-}
-
-void OhiGroveOled112_activateScroll()
-{
-	OhiGroveOled112_sendCommand(OhiGroveOled112_Activate_Scroll_Cmd);
-}
-
-void OhiGroveOled112_deactivateScroll()
-{
-	OhiGroveOled112_sendCommand(OhiGroveOled112_Dectivate_Scroll_Cmd);
-}
-
-void OhiGroveOled112_setNormalDisplay()
-{
-	OhiGroveOled112_sendCommand(OhiGroveOled112_Normal_Display_Cmd);
-}
-
-void OhiGroveOled112_setInverseDisplay()
-{
-	OhiGroveOled112_sendCommand(OhiGroveOled112_Inverse_Display_Cmd);
+    OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_INVERSE_DISPLAY);
 }
 
 

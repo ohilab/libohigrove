@@ -4,6 +4,7 @@
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
  *  Marco Contigiani <marco.contigiani86@gmail.com>
+ *  Alessio Paolucci <a.paolucci89@gmail.com>
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +29,7 @@
  * @file libohigrove/ohigrove.h
  * @author Marco Giammarini <m.giammarini@warcomeb.it>
  * @author Marco Contigiani <marco.contigiani86@gmail.com>
+ * @author Alessio Paolucci <a.paolucci89@gmail.com>
  * @brief 
  */
 
@@ -43,7 +45,7 @@ typedef struct
 
 } OhiGrove_DigitalConnector;
 
-const OhiGrove_DigitalConnector OhiGrove_Digital[] =
+const OhiGrove_DigitalConnector OhiGrove_digital[] =
 {
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
@@ -67,8 +69,29 @@ const OhiGrove_DigitalConnector OhiGrove_Digital[] =
     {OHIGROVE_CONN_D4,   GPIO_PINS_PTD4,  GPIO_PINS_PTD7},
     {OHIGROVE_CONN_D5,   GPIO_PINS_PTA12,  GPIO_PINS_PTA13},
     {OHIGROVE_CONN_D6,   GPIO_PINS_PTB18,  GPIO_PINS_PTB19},
-    {OHIGROVE_CONN_I2C1,   IIC_PINS_PTB2,  IIC_PINS_PTB3},
-    {OHIGROVE_CONN_I2C2,   IIC_PINS_PTC10,  IIC_PINS_PTC11},
+
+#endif
+};
+
+typedef struct
+{
+    OhiGrove_Conn connector;   /*< The grove connector of the shield/topping */
+
+    Iic_SclPins scl;
+    Iic_SdaPins sda;
+
+} OhiGrove_IicBusConnector;
+
+const OhiGrove_IicBusConnector OhiGrove_iicBus[] =
+{
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+
+    {OHIGROVE_CONN_I2C, IIC_PINS_PTC1, IIC_PINS_PTC2},
+
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+    {OHIGROVE_CONN_I2C1, IIC_PINS_PTB2,  IIC_PINS_PTB3},
+    {OHIGROVE_CONN_I2C2, IIC_PINS_PTC10, IIC_PINS_PTC11},
 
 #endif
 };
@@ -87,7 +110,7 @@ typedef struct
 
 } OhiGrove_AnalogConnector;
 
-static OhiGrove_AnalogConnector OhiGrove_Analog[] =
+static OhiGrove_AnalogConnector OhiGrove_analog[] =
 {
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
@@ -106,8 +129,9 @@ static OhiGrove_AnalogConnector OhiGrove_Analog[] =
 #endif
 };
 
-#define OHIGROVE_DIGITAL_SIZE    ( sizeof OhiGrove_Digital / sizeof OhiGrove_Digital[0] )
-#define OHIGROVE_ANALOG_SIZE     ( sizeof OhiGrove_Analog / sizeof OhiGrove_Analog[0] )
+#define OHIGROVE_DIGITAL_SIZE    ( sizeof OhiGrove_digital / sizeof OhiGrove_digital[0] )
+#define OHIGROVE_ANALOG_SIZE     ( sizeof OhiGrove_analog / sizeof OhiGrove_analog[0] )
+#define OHIGROVE_IIC_SIZE        ( sizeof OhiGrove_iicBus / sizeof OhiGrove_iicBus[0] )
 
 
 #if defined (LIBOHIBOARD_FRDMKL25Z)
@@ -143,15 +167,13 @@ static Adc_Config OhiGrove_adcConfig = {
 	.voltRef            = ADC_VREF,
 };
 
-static Iic_Config OhiGrove_IicConfig = {
-    .sclPin = IIC_PINS_SCLNONE,
-    .sdaPin = IIC_PINS_SDANONE,
+static Iic_Config OhiGrove_iicConfig = {
+    .sclPin       = IIC_PINS_SCLNONE,
+    .sdaPin       = IIC_PINS_SDANONE,
 
-    .baudRate = 100000,
-    .devType = IIC_MASTER_MODE,
-    .addressMode = IIC_SEVEN_BIT,
-
-//    .sclTimeout = ,
+    .baudRate     = 100000,
+    .devType      = IIC_MASTER_MODE,
+    .addressMode  = IIC_SEVEN_BIT,
 };
 
 //static Ftm_Config OhiGrove_highFrequency =
@@ -252,37 +274,48 @@ void OhiGrove_initBoard ()
 
 Gpio_Pins OhiGrove_getDigitalPin(OhiGrove_Conn connector)
 {
-    if (OhiGrove_Digital[connector].connector == connector)
-        return OhiGrove_Digital[connector].pin1;
+    if (OhiGrove_digital[connector].connector == connector)
+        return OhiGrove_digital[connector].pin1;
     else
         return GPIO_PINS_NONE;
 }
 
 static Iic_SclPins OhiGrove_getIicSclPin (OhiGrove_Conn connector)
 {
-    if (OhiGrove_Digital[connector].connector == connector)
-        return OhiGrove_Digital[connector].pin1;
-    else
-        return IIC_PINS_SCLNONE;
+    uint8_t i = 0;
+
+    for (i = 0; i < OHIGROVE_IIC_SIZE; ++i)
+    {
+        if (OhiGrove_iicBus[i].connector == connector)
+            return OhiGrove_iicBus[i].scl;
+    }
+    return IIC_PINS_SCLNONE;
 }
 
 static Iic_SdaPins OhiGrove_getIicSdaPin (OhiGrove_Conn connector)
 {
-    if (OhiGrove_Digital[connector].connector == connector)
-        return OhiGrove_Digital[connector].pin2;
-    else
-    	return IIC_PINS_SDANONE;
+    uint8_t i = 0;
+
+    for (i = 0; i < OHIGROVE_IIC_SIZE; ++i)
+    {
+        if (OhiGrove_iicBus[i].connector == connector)
+            return OhiGrove_iicBus[i].sda;
+    }
+    return IIC_PINS_SDANONE;
 }
 
-static Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector)
+Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector)
 {
 
 	switch (connector)
 	{
-#if defined (LIBOHIBOARD_OHIBOARD_R1)
-	case 9:
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+	case OHIGROVE_CONN_I2C:
 		return IIC0;
-	case 10:
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+	case OHIGROVE_CONN_I2C1:
+		return IIC0;
+	case OHIGROVE_CONN_I2C2:
 		return IIC1;
 #endif
 	default:
@@ -292,17 +325,17 @@ static Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector)
 	return NULL;
 }
 
-System_Errors OhiGrove_IicEnable (OhiGrove_Conn connector, uint32_t baudrate)
+System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate)
 {
 	Iic_DeviceHandle device = NULL;
 
 	device = OhiGrove_getIicDevice(connector);
-	OhiGrove_IicConfig.sclPin = OhiGrove_getIicSclPin(connector);
-	OhiGrove_IicConfig.sdaPin = OhiGrove_getIicSdaPin(connector);
+	OhiGrove_iicConfig.sclPin = OhiGrove_getIicSclPin(connector);
+	OhiGrove_iicConfig.sdaPin = OhiGrove_getIicSdaPin(connector);
 	if (baudrate != 0)
-		OhiGrove_IicConfig.baudRate = (baudrate);
+		OhiGrove_iicConfig.baudRate = (baudrate);
 
-	return Iic_init(device, &OhiGrove_IicConfig);
+	return Iic_init(device, &OhiGrove_iicConfig);
 }
 
 Adc_Pins OhiGrove_getAnalogPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)
@@ -311,12 +344,12 @@ Adc_Pins OhiGrove_getAnalogPin(OhiGrove_Conn connector, OhiGrove_PinNumber numbe
 
 	for (i = 0; i < OHIGROVE_ANALOG_SIZE; ++i)
 	{
-	    if (OhiGrove_Analog[i].connector == connector)
+	    if (OhiGrove_analog[i].connector == connector)
 	    {
 	    	if (number == OHIGROVE_PIN_NUMBER_1)
-	    		return OhiGrove_Analog[i].pin1;
+	    		return OhiGrove_analog[i].pin1;
 	    	else
-	    		return OhiGrove_Analog[i].pin2;
+	    		return OhiGrove_analog[i].pin2;
 	    }
 	}
 	return ADC_PINS_NONE;
@@ -328,12 +361,12 @@ Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn connector, OhiGrove_P
 
 	for (i = 0; i < OHIGROVE_ANALOG_SIZE; ++i)
 	{
-	    if (OhiGrove_Analog[i].connector == connector)
+	    if (OhiGrove_analog[i].connector == connector)
 	    {
 	    	if (number == OHIGROVE_PIN_NUMBER_1)
-	    		return OhiGrove_Analog[i].pin1Channel;
+	    		return OhiGrove_analog[i].pin1Channel;
 	    	else
-	    		return OhiGrove_Analog[i].pin2Channel;
+	    		return OhiGrove_analog[i].pin2Channel;
 	    }
 	}
 	return ADC_CH_DISABLE;
@@ -346,12 +379,12 @@ Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_Pin
 
 	for (i = 0; i < OHIGROVE_ANALOG_SIZE; ++i)
 	{
-	    if (OhiGrove_Analog[i].connector == connector)
+	    if (OhiGrove_analog[i].connector == connector)
 	    {
 	    	if (number == OHIGROVE_PIN_NUMBER_1)
-	    		device = OhiGrove_Analog[i].pin1Device;
+	    		device = OhiGrove_analog[i].pin1Device;
 	    	else
-	    		device = OhiGrove_Analog[i].pin2Device;
+	    		device = OhiGrove_analog[i].pin2Device;
 
 	    	switch (device)
 	    	{
@@ -360,8 +393,6 @@ Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_Pin
 #if defined (LIBOHIBOARD_OHIBOARD_R1)
 	    	case 1:
 	    		return ADC1;
-//	    	case 2:
-//	    		return ADC2;
 #endif
 	    	default:
 	    		return NULL;

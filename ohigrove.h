@@ -103,7 +103,8 @@ void OhiGrove_delay (uint32_t msDelay);
 
 Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn connector);
 
-System_Errors OhiGrove_IicEnable (OhiGrove_Conn connector, uint32_t baudrate);
+Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector);
+System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate);
 
 Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn connector, OhiGrove_PinNumber number);
 Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn connector, OhiGrove_PinNumber number);
