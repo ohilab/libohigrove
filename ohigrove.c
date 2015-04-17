@@ -311,7 +311,7 @@ Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector)
 	{
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 	case OHIGROVE_CONN_I2C:
-		return IIC0;
+		return IIC1;
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 	case OHIGROVE_CONN_I2C1:
 		return IIC0;
