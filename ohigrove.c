@@ -100,6 +100,26 @@ typedef struct
 {
     OhiGrove_Conn connector;   /*< The grove connector of the shield/topping */
 
+    Uart_RxPins rx;
+    Uart_TxPins tx;
+
+} OhiGrove_UartBusConnector;
+
+const OhiGrove_UartBusConnector OhiGrove_uartBus[] =
+{
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+
+    {OHIGROVE_CONN_UART, UART_PINS_PTA1, UART_PINS_PTA2},
+
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+#endif
+};
+
+typedef struct
+{
+    OhiGrove_Conn connector;   /*< The grove connector of the shield/topping */
+
     Adc_Pins pin1;
     Adc_ChannelNumber pin1Channel;
     uint8_t pin1Device;
@@ -132,6 +152,7 @@ static OhiGrove_AnalogConnector OhiGrove_analog[] =
 #define OHIGROVE_DIGITAL_SIZE    ( sizeof OhiGrove_digital / sizeof OhiGrove_digital[0] )
 #define OHIGROVE_ANALOG_SIZE     ( sizeof OhiGrove_analog / sizeof OhiGrove_analog[0] )
 #define OHIGROVE_IIC_SIZE        ( sizeof OhiGrove_iicBus / sizeof OhiGrove_iicBus[0] )
+#define OHIGROVE_UART_SIZE       ( sizeof OhiGrove_uartBus / sizeof OhiGrove_uartBus[0] )
 
 
 #if defined (LIBOHIBOARD_FRDMKL25Z)
@@ -174,6 +195,16 @@ static Iic_Config OhiGrove_iicConfig = {
     .baudRate     = 100000,
     .devType      = IIC_MASTER_MODE,
     .addressMode  = IIC_SEVEN_BIT,
+};
+
+static Uart_Config OhiGrove_uartConfig = {
+    .txPin       = UART_PINS_TXNONE,
+    .rxPin       = UART_PINS_RXNONE,
+
+    .dataBits    = UART_DATABITS_EIGHT,
+    .parity      = UART_PARITY_NONE,
+
+    .baudrate    = 9600,
 };
 
 //static Ftm_Config OhiGrove_highFrequency =
@@ -336,6 +367,61 @@ System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate)
 		OhiGrove_iicConfig.baudRate = (baudrate);
 
 	return Iic_init(device, &OhiGrove_iicConfig);
+}
+
+static Uart_RxPins OhiGrove_getUartRxPin (OhiGrove_Conn connector)
+{
+    uint8_t i = 0;
+
+    for (i = 0; i < OHIGROVE_UART_SIZE; ++i)
+    {
+        if (OhiGrove_uartBus[i].connector == connector)
+            return OhiGrove_uartBus[i].rx;
+    }
+    return UART_PINS_RXNONE;
+}
+
+static Uart_TxPins OhiGrove_getUartTxPin (OhiGrove_Conn connector)
+{
+    uint8_t i = 0;
+
+    for (i = 0; i < OHIGROVE_UART_SIZE; ++i)
+    {
+        if (OhiGrove_uartBus[i].connector == connector)
+            return OhiGrove_uartBus[i].tx;
+    }
+    return UART_PINS_TXNONE;
+}
+
+Uart_DeviceHandle OhiGrove_getUartDevice (OhiGrove_Conn connector)
+{
+
+    switch (connector)
+    {
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+    case OHIGROVE_CONN_UART:
+        return UART0;
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+#endif
+    default:
+        return NULL;
+    }
+
+    return NULL;
+}
+
+System_Errors OhiGrove_uartEnable (OhiGrove_Conn connector, uint32_t baudrate)
+{
+    Uart_DeviceHandle device = NULL;
+
+    device = OhiGrove_getUartDevice(connector);
+    OhiGrove_uartConfig.rxPin = OhiGrove_getUartRxPin(connector);
+    OhiGrove_uartConfig.txPin = OhiGrove_getUartTxPin(connector);
+    if (baudrate != 0)
+        OhiGrove_uartConfig.baudrate = baudrate;
+
+    return Uart_open(device,0,&OhiGrove_uartConfig);
 }
 
 Adc_Pins OhiGrove_getAnalogPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)
