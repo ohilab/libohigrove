@@ -255,9 +255,12 @@ static Ftm_Config OhiGrove_baseTimer =
 };
 
 static uint32_t OhiGrove_milliseconds = 0;
-static void OhiGrove_baseTimerInterrupt (void)
+void OhiGrove_baseTimerInterrupt ()
 {
     OhiGrove_milliseconds++;
+
+    /* Clear exiting ISR */
+    TPM2_SC |= TPM_SC_TOF_MASK;
 }
 
 void OhiGrove_delay (uint32_t msDelay)
@@ -288,6 +291,7 @@ void OhiGrove_initBoard ()
             SIM_SCGC5_PORTD_MASK |
             SIM_SCGC5_PORTE_MASK);
 
+    errors = Clock_setDividers(OhiGrove_clockConfig.busDivider, 0,0);
     errors = Clock_Init(&OhiGrove_clockConfig);
     errors = Clock_setDividers(OhiGrove_clockConfig.busDivider, 0,0);
     foutSYS = Clock_getFrequency(CLOCK_SYSTEM);

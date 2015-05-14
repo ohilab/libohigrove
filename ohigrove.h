@@ -99,6 +99,7 @@ typedef enum _OhiGrove_PinNumber
 
 void OhiGrove_initBoard();
 
+void OhiGrove_baseTimerInterrupt (void);
 void OhiGrove_delay (uint32_t msDelay);
 uint32_t OhiGrove_currentTime ();
 
