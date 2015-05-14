@@ -32,6 +32,8 @@
 #ifndef __SERIAL_H
 #define __SERIAL_H
 
+#define OHIGROVESERIAL_BUFFER_SIZE    0x3F
+
 #include "ohigrove.h"
 
 typedef struct _OhiGroveSerial_Device
@@ -40,6 +42,12 @@ typedef struct _OhiGroveSerial_Device
 
     Uart_DeviceHandle device;
     uint32_t baudrate;
+
+    uint8_t rxBuffer[OHIGROVESERIAL_BUFFER_SIZE+1];
+    uint8_t rxBufferTail;
+    uint8_t rxBufferHead;
+
+    uint32_t timeout;
 
 } OhiGroveSerial_Device;
 
@@ -50,7 +58,11 @@ typedef enum
 
 } OhiGroveSerial_PrintType;
 
-void OhiGroveSerial_init   (OhiGroveSerial_Device* dev);
+void OhiGroveSerial_isrUart0();
+void OhiGroveSerial_isrUart1();
+void OhiGroveSerial_isrUart2();
+
+void OhiGroveSerial_init(OhiGroveSerial_Device* dev);
 
 void OhiGroveSerial_write(OhiGroveSerial_Device* dev, uint8_t value);
 void OhiGroveSerial_writeBuffer(OhiGroveSerial_Device* dev, uint8_t* buffer, uint8_t length);
@@ -67,6 +79,12 @@ void OhiGroveSerial_printlnInt(OhiGroveSerial_Device* dev, int16_t value);
 System_Errors OhiGroveSerial_printFloat(OhiGroveSerial_Device* dev, float value, uint8_t precision);
 System_Errors OhiGroveSerial_printlnFloat(OhiGroveSerial_Device* dev, float value, uint8_t precision);
 
+uint8_t OhiGroveSerial_available(OhiGroveSerial_Device* dev);
+uint8_t OhiGroveSerial_read(OhiGroveSerial_Device* dev);
+uint8_t OhiGroveSerial_readBytes(OhiGroveSerial_Device* dev, uint8_t buffer[], uint8_t length);
+uint8_t OhiGroveSerial_peek(OhiGroveSerial_Device* dev);
+
+void OhiGroveSerial_setTimeout(OhiGroveSerial_Device* dev, uint32_t timeout);
 
 #endif /* __SERIAL_H */
 

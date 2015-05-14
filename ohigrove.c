@@ -35,6 +35,7 @@
 
 #include "ohigrove.h"
 
+typedef void (*OhiGroveCallback)(void);
 
 typedef struct
 {
@@ -96,6 +97,17 @@ const OhiGrove_IicBusConnector OhiGrove_iicBus[] =
 #endif
 };
 
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+
+extern void OhiGroveSerial_isrUart0();
+extern void OhiGroveSerial_isrUart1();
+extern void OhiGroveSerial_isrUart2();
+
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+
+#endif
+
 typedef struct
 {
     OhiGrove_Conn connector;   /*< The grove connector of the shield/topping */
@@ -103,13 +115,15 @@ typedef struct
     Uart_RxPins rx;
     Uart_TxPins tx;
 
+    OhiGroveCallback callback;
+
 } OhiGrove_UartBusConnector;
 
 const OhiGrove_UartBusConnector OhiGrove_uartBus[] =
 {
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
-    {OHIGROVE_CONN_UART, UART_PINS_PTA1, UART_PINS_PTA2},
+    {OHIGROVE_CONN_UART, UART_PINS_PTA1, UART_PINS_PTA2, OhiGroveSerial_isrUart0},
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
@@ -198,13 +212,14 @@ static Iic_Config OhiGrove_iicConfig = {
 };
 
 static Uart_Config OhiGrove_uartConfig = {
-    .txPin       = UART_PINS_TXNONE,
-    .rxPin       = UART_PINS_RXNONE,
+    .txPin        = UART_PINS_TXNONE,
+    .rxPin        = UART_PINS_RXNONE,
 
-    .dataBits    = UART_DATABITS_EIGHT,
-    .parity      = UART_PARITY_NONE,
+    .dataBits     = UART_DATABITS_EIGHT,
+    .parity       = UART_PARITY_NONE,
 
-    .baudrate    = 9600,
+    .baudrate     = 9600,
+    .oversampling = 16,
 };
 
 //static Ftm_Config OhiGrove_highFrequency =
@@ -250,6 +265,11 @@ void OhiGrove_delay (uint32_t msDelay)
     uint32_t currTicks = OhiGrove_milliseconds;
 
     while ((OhiGrove_milliseconds - currTicks) < msDelay);
+}
+
+uint32_t OhiGrove_currentTime ()
+{
+    return OhiGrove_milliseconds;
 }
 
 void OhiGrove_initBoard ()
@@ -393,6 +413,18 @@ static Uart_TxPins OhiGrove_getUartTxPin (OhiGrove_Conn connector)
     return UART_PINS_TXNONE;
 }
 
+static OhiGroveCallback OhiGrove_getUartCallback (OhiGrove_Conn connector)
+{
+    uint8_t i = 0;
+
+    for (i = 0; i < OHIGROVE_UART_SIZE; ++i)
+    {
+        if (OhiGrove_uartBus[i].connector == connector)
+            return OhiGrove_uartBus[i].callback;
+    }
+    return NULL;
+}
+
 Uart_DeviceHandle OhiGrove_getUartDevice (OhiGrove_Conn connector)
 {
 
@@ -421,7 +453,7 @@ System_Errors OhiGrove_uartEnable (OhiGrove_Conn connector, uint32_t baudrate)
     if (baudrate != 0)
         OhiGrove_uartConfig.baudrate = baudrate;
 
-    return Uart_open(device,0,&OhiGrove_uartConfig);
+    return Uart_open(device,OhiGrove_getUartCallback(connector),&OhiGrove_uartConfig);
 }
 
 Adc_Pins OhiGrove_getAnalogPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)

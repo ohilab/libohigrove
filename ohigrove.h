@@ -100,6 +100,7 @@ typedef enum _OhiGrove_PinNumber
 void OhiGrove_initBoard();
 
 void OhiGrove_delay (uint32_t msDelay);
+uint32_t OhiGrove_currentTime ();
 
 Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn connector);
 
