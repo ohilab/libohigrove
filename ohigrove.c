@@ -255,12 +255,12 @@ static Ftm_Config OhiGrove_baseTimer =
 };
 
 static uint32_t OhiGrove_milliseconds = 0;
-void OhiGrove_baseTimerInterrupt ()
+static void OhiGrove_baseTimerInterrupt ()
 {
     OhiGrove_milliseconds++;
-
-    /* Clear exiting ISR */
-    TPM2_SC |= TPM_SC_TOF_MASK;
+//
+//    /* Clear exiting ISR */
+//    TPM2_SC |= TPM_SC_TOF_MASK;
 }
 
 void OhiGrove_delay (uint32_t msDelay)
