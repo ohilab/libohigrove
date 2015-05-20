@@ -24,12 +24,12 @@
  ******************************************************************************/
 
 /**
- * @file libohigrove/airQuality-sensor.c
+ * @file libohigrove/airquality-sensor.c
  * @author Alessio Paolucci <a.paolucci89@gmail.com>
  * @brief
  */
 
-#include "airQuality-sensor.h"
+#include "airquality-sensor.h"
 
 void OhiGroveAirQualitySensor_init (OhiGroveAirQualitySensor_Device* dev)
 {

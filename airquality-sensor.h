@@ -24,7 +24,7 @@
  ******************************************************************************/
 
 /**
- * @file libohigrove/airQuality-sensor.h
+ * @file libohigrove/airquality-sensor.h
  * @author Alessio Paolucci <a.paolucci89@gmail.com>
  * @brief
  */
