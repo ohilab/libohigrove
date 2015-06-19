@@ -51,7 +51,7 @@ void OhiGroveWaterSensor_init (OhiGroveWaterSensor_Device* dev)
 	}
 	else if(dev->connectorType == WATERSENSOR_CONNTYPE_DIGITAL)
 	{
-	    dev->pin = OhiGrove_getDigitalPin(dev->connector);
+	    dev->pin = OhiGrove_getDigitalPin(dev->connector,OHIGROVE_PIN_NUMBER_1);
 
 	    if (dev->pin != GPIO_PINS_NONE)
 	    {

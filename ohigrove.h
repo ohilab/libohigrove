@@ -101,9 +101,10 @@ void OhiGrove_initBoard();
 
 //void OhiGrove_baseTimerInterrupt (void);
 void OhiGrove_delay (uint32_t msDelay);
+void OhiGrove_delay10Microsecond (uint32_t usDelay);
 uint32_t OhiGrove_currentTime ();
 
-Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn connector);
+Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn connector,  OhiGrove_PinNumber number);
 
 Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector);
 System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate);

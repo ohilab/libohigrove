@@ -33,7 +33,7 @@
 
 void OhiGroveBuzzer_init (OhiGroveBuzzer_Device* dev)
 {
-    dev->pin = OhiGrove_getDigitalPin(dev->connector);
+    dev->pin = OhiGrove_getDigitalPin(dev->connector,OHIGROVE_PIN_NUMBER_1);
 
     if (dev->pin != GPIO_PINS_NONE)
     {

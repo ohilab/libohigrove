@@ -250,14 +250,22 @@ static Ftm_Config OhiGrove_baseTimer =
 {
     .mode              = FTM_MODE_FREE,
 
-    .timerFrequency    = 1000,
+    .timerFrequency    = 100000,
     .initCounter       = 0,
 };
 
 static uint32_t OhiGrove_milliseconds = 0;
+static uint32_t OhiGrove_10microseconds = 0;
+
 static void OhiGrove_baseTimerInterrupt ()
 {
-    OhiGrove_milliseconds++;
+	OhiGrove_10microseconds++;
+
+	if (OhiGrove_10microseconds == 100)
+	{
+		OhiGrove_milliseconds++;
+		OhiGrove_10microseconds = 0;
+	}
 //
 //    /* Clear exiting ISR */
 //    TPM2_SC |= TPM_SC_TOF_MASK;
@@ -268,6 +276,15 @@ void OhiGrove_delay (uint32_t msDelay)
     uint32_t currTicks = OhiGrove_milliseconds;
 
     while ((OhiGrove_milliseconds - currTicks) < msDelay);
+}
+
+void OhiGrove_delay10Microsecond (uint32_t usDelay)
+{
+    uint32_t currTicks = OhiGrove_10microseconds;
+
+    if (usDelay > 100);
+
+    while ((OhiGrove_10microseconds - currTicks) < usDelay);
 }
 
 uint32_t OhiGrove_currentTime ()
@@ -327,12 +344,23 @@ void OhiGrove_initBoard ()
 #endif
 }
 
-Gpio_Pins OhiGrove_getDigitalPin(OhiGrove_Conn connector)
+Gpio_Pins OhiGrove_getDigitalPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)
 {
-    if (OhiGrove_digital[connector].connector == connector)
-        return OhiGrove_digital[connector].pin1;
-    else
-        return GPIO_PINS_NONE;
+	uint8_t i = 0;
+
+    for (i = 0; i < OHIGROVE_DIGITAL_SIZE; ++i)
+    {
+    	if (OhiGrove_digital[i].connector == connector)
+    	{
+    		if (number == OHIGROVE_PIN_NUMBER_1)
+    			return OhiGrove_digital[i].pin1;
+    		else if (number == OHIGROVE_PIN_NUMBER_2)
+    			return OhiGrove_digital[i].pin2;
+    		else
+    			return GPIO_PINS_NONE;
+    	}
+    }
+	return GPIO_PINS_NONE;
 }
 
 static Iic_SclPins OhiGrove_getIicSclPin (OhiGrove_Conn connector)
