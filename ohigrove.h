@@ -116,4 +116,8 @@ Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn connector, OhiGrove_PinNumber numb
 Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn connector, OhiGrove_PinNumber number);
 Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_PinNumber number);
 
+void OhiGrove_addInfraredPin (Gpio_Pins pin);
+void OhiGrove_enableInfrared (Gpio_Pins pin);
+void OhiGrove_disableInfrared (Gpio_Pins pin);
+
 #endif /* __OHIGROVE_H */

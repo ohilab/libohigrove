@@ -222,6 +222,22 @@ static Uart_Config OhiGrove_uartConfig = {
     .oversampling = 16,
 };
 
+/* OHI GROVE - Infrared device */
+typedef struct
+{
+    Gpio_Pins pin;
+    bool enable;
+} OhiGrove_InfraredConnector;
+
+static bool OhiGrove_enableInfraredTx = FALSE;
+static uint8_t OhiGrove_infraredTxPinsCount = 0;
+static OhiGrove_InfraredConnector OhiGrove_infrared[OHIGROVE_DIGITAL_SIZE];
+static Gpio_Level OhiGrove_infraredStatus = GPIO_LOW;
+
+#define OHIGROVE_INFRARED_CYCLE                2//26
+#define OHIGROVE_INFRARED_DUTY                 1//5
+
+
 //static Ftm_Config OhiGrove_highFrequency =
 //{
 //    .mode              = FTM_MODE_PWM,
@@ -257,18 +273,41 @@ static Ftm_Config OhiGrove_baseTimer =
 static uint32_t OhiGrove_milliseconds = 0;
 static uint32_t OhiGrove_10microseconds = 0;
 
+static uint8_t OhiGrove_infraredTimer = 0;
+
 static void OhiGrove_baseTimerInterrupt ()
 {
+	uint8_t i = 0;
+
 	OhiGrove_10microseconds++;
+	OhiGrove_infraredTimer++;
 
 	if (OhiGrove_10microseconds == 100)
 	{
 		OhiGrove_milliseconds++;
 		OhiGrove_10microseconds = 0;
 	}
-//
-//    /* Clear exiting ISR */
-//    TPM2_SC |= TPM_SC_TOF_MASK;
+
+	if (OhiGrove_infraredTimer == OHIGROVE_INFRARED_DUTY)
+	{
+		OhiGrove_infraredStatus = GPIO_LOW;
+	}
+	else if (OhiGrove_infraredTimer == OHIGROVE_INFRARED_CYCLE)
+	{
+		OhiGrove_infraredStatus = GPIO_HIGH;
+		OhiGrove_infraredTimer = 0;
+	}
+
+	if (OhiGrove_enableInfraredTx == TRUE)
+	{
+		for (i = 0; i < OhiGrove_infraredTxPinsCount; ++i)
+		{
+			if ((OhiGrove_infrared[i].enable == TRUE) && (OhiGrove_infraredStatus == GPIO_HIGH))
+				Gpio_set(OhiGrove_infrared[i].pin);
+			else
+				Gpio_clear(OhiGrove_infrared[i].pin);
+		}
+	}
 }
 
 void OhiGrove_delay (uint32_t msDelay)
@@ -282,7 +321,7 @@ void OhiGrove_delay10Microsecond (uint32_t usDelay)
 {
     uint32_t currTicks = OhiGrove_10microseconds;
 
-    if (usDelay > 100);
+    if (usDelay > 100) return;
 
     while ((OhiGrove_10microseconds - currTicks) < usDelay);
 }
@@ -297,6 +336,7 @@ void OhiGrove_initBoard ()
     uint32_t foutBUS;
     uint32_t foutSYS;
     System_Errors errors = ERRORS_NO_ERROR;
+    uint8_t index = 0;
 
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
@@ -321,6 +361,12 @@ void OhiGrove_initBoard ()
     OhiGrove_milliseconds = 0;
 
     Adc_init(ADC0,&OhiGrove_adcConfig);
+
+    for (index = 0; index < OHIGROVE_DIGITAL_SIZE; ++index)
+    {
+    	OhiGrove_infrared[index].pin = GPIO_PINS_NONE;
+    	OhiGrove_infrared[index].enable = FALSE;
+    }
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
     
@@ -550,4 +596,44 @@ Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_Pin
 	    }
 	}
 	return NULL;
+}
+
+void OhiGrove_addInfraredPin (Gpio_Pins pin)
+{
+	if (OhiGrove_infraredTxPinsCount > OHIGROVE_DIGITAL_SIZE) return;
+
+	OhiGrove_infrared[OhiGrove_infraredTxPinsCount].pin = pin;
+	OhiGrove_infrared[OhiGrove_infraredTxPinsCount].enable = FALSE;
+	OhiGrove_infraredTxPinsCount++;
+
+	OhiGrove_enableInfraredTx = TRUE;
+}
+
+void OhiGrove_enableInfrared (Gpio_Pins pin)
+{
+	uint8_t index;
+
+    for (index = 0; index < OHIGROVE_DIGITAL_SIZE; ++index)
+    {
+    	if (OhiGrove_infrared[index].pin == pin)
+    	{
+        	OhiGrove_infrared[index].enable = TRUE;
+    		return;
+    	}
+    }
+}
+
+void OhiGrove_disableInfrared (Gpio_Pins pin)
+{
+	uint8_t index;
+
+	for (index = 0; index < OHIGROVE_DIGITAL_SIZE; ++index)
+    {
+    	if (OhiGrove_infrared[index].pin == pin)
+    	{
+        	OhiGrove_infrared[index].enable = FALSE;
+        	Gpio_clear(pin);
+    		return;
+    	}
+    }
 }
