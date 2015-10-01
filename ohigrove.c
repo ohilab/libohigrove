@@ -163,10 +163,40 @@ static OhiGrove_AnalogConnector OhiGrove_analog[] =
 #endif
 };
 
+typedef struct
+{
+    OhiGrove_Conn connector;   /*< The grove connector of the shield/topping */
+
+    Ftm_Pins pin1;
+    Ftm_Channels pin1Channel;
+    uint8_t pin1Device;
+
+} OhiGrove_FtmConnector;
+
+static OhiGrove_FtmConnector OhiGrove_ftm[] =
+{
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+
+    {OHIGROVE_CONN_D2,   FTM_PINS_PTD4,  FTM_CHANNELS_CH4, 0},
+    {OHIGROVE_CONN_D3,   FTM_PINS_PTA12, FTM_CHANNELS_CH0, 1},
+    {OHIGROVE_CONN_D4,   FTM_PINS_PTA4,  FTM_CHANNELS_CH1, 0},
+    {OHIGROVE_CONN_D5,   FTM_PINS_PTA5,  FTM_CHANNELS_CH2, 0},
+    {OHIGROVE_CONN_D6,   FTM_PINS_PTC8,  FTM_CHANNELS_CH4, 0},
+    {OHIGROVE_CONN_D7,   FTM_PINS_PTC9,  FTM_CHANNELS_CH5, 0},
+    {OHIGROVE_CONN_D8,   FTM_PINS_PTA13, FTM_CHANNELS_CH1, 1},
+
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+#endif
+};
+
+
+
 #define OHIGROVE_DIGITAL_SIZE    ( sizeof OhiGrove_digital / sizeof OhiGrove_digital[0] )
 #define OHIGROVE_ANALOG_SIZE     ( sizeof OhiGrove_analog / sizeof OhiGrove_analog[0] )
 #define OHIGROVE_IIC_SIZE        ( sizeof OhiGrove_iicBus / sizeof OhiGrove_iicBus[0] )
 #define OHIGROVE_UART_SIZE       ( sizeof OhiGrove_uartBus / sizeof OhiGrove_uartBus[0] )
+#define OHIGROVE_FTM_SIZE        ( sizeof OhiGrove_ftm / sizeof OhiGrove_ftm[0] )
 
 
 #if defined (LIBOHIBOARD_FRDMKL25Z)
@@ -237,37 +267,22 @@ static Gpio_Level OhiGrove_infraredStatus = GPIO_LOW;
 #define OHIGROVE_INFRARED_CYCLE                2//26
 #define OHIGROVE_INFRARED_DUTY                 1//5
 
-
-//static Ftm_Config OhiGrove_highFrequency =
-//{
-//    .mode              = FTM_MODE_PWM,
-//
-//    .timerFrequency    = 1000,
-//    .initCounter       = 0,
-//
-//    .pins              = {FTM_PINS_STOP},
-//
-//    .configurationBits = FTM_CONFIG_PWM_EDGE_ALIGNED | FTM_CONFIG_PWM_POLARITY_LOW | 0,
-//};
-//
-//static Ftm_Config OhiGrove_lowFrequency =
-//{
-//    .mode              = FTM_MODE_PWM,
-//
-//    .timerFrequency    = 500,
-//    .initCounter       = 0,
-//
-//    .pins              = {FTM_PINS_STOP},
-//
-//    .configurationBits = FTM_CONFIG_PWM_EDGE_ALIGNED | FTM_CONFIG_PWM_POLARITY_LOW | 0,
-//};
-
 static Ftm_Config OhiGrove_baseTimer = 
 {
     .mode              = FTM_MODE_FREE,
 
     .timerFrequency    = 100000,
     .initCounter       = 0,
+};
+
+static Ftm_Config OhiGrove_otherTimer =
+{
+	.mode              = FTM_MODE_INPUT_CAPTURE,
+
+	.timerFrequency    = 0,
+	.initCounter       = 0,
+	.pins              = {FTM_PINS_STOP},
+	.configurationBits = 0,
 };
 
 static uint32_t OhiGrove_milliseconds = 0;
@@ -355,8 +370,6 @@ void OhiGrove_initBoard ()
     foutBUS = Clock_getFrequency(CLOCK_BUS);
 
 
-//    Ftm_init(FTM0,0,&OhiGrove_highFrequency);
-//    Ftm_init(FTM1,0,&OhiGrove_lowFrequency);
     Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
     OhiGrove_milliseconds = 0;
 
@@ -381,11 +394,6 @@ void OhiGrove_initBoard ()
     errors = Clock_setDividers(OhiGrove_clockConfig.busDivider, OhiGrove_clockConfig.flexbusDivider, OhiGrove_clockConfig.flashDivider);
 	foutSYS = Clock_getFrequency(CLOCK_SYSTEM);
     foutBUS = Clock_getFrequency(CLOCK_BUS);
-
-//    Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
-//    OhiGrove_milliseconds = 0;
-//
-//    Adc_init(ADC0,&OhiGrove_adcConfig);
 
 #endif
 }
@@ -435,7 +443,6 @@ static Iic_SdaPins OhiGrove_getIicSdaPin (OhiGrove_Conn connector)
 
 Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector)
 {
-
 	switch (connector)
 	{
 #if defined (LIBOHIBOARD_FRDMKL25Z)
@@ -596,6 +603,75 @@ Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_Pin
 	    }
 	}
 	return NULL;
+}
+
+Ftm_DeviceHandle OhiGrove_getFtmDevice (OhiGrove_Conn connector)
+{
+	switch (connector)
+	{
+#if defined (LIBOHIBOARD_FRDMKL25Z)
+	case OHIGROVE_CONN_D2:
+		return FTM0;
+	case OHIGROVE_CONN_D3:
+		return FTM1;
+	case OHIGROVE_CONN_D4:
+		return FTM0;
+	case OHIGROVE_CONN_D5:
+		return FTM0;
+	case OHIGROVE_CONN_D6:
+		return FTM0;
+	case OHIGROVE_CONN_D7:
+		return FTM0;
+	case OHIGROVE_CONN_D8:
+		return FTM1;
+#elif defined (LIBOHIBOARD_OHIBOARD_R1)
+
+#endif
+	default:
+	    return NULL;
+	}
+
+	return NULL;
+}
+
+Ftm_Pins OhiGrove_getFtmPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)
+{
+    uint8_t i = 0;
+
+    for (i = 0; i < OHIGROVE_FTM_SIZE; ++i)
+    {
+        if (OhiGrove_ftm[i].connector == connector)
+        {
+            if (number == OHIGROVE_PIN_NUMBER_1)
+                return OhiGrove_ftm[i].pin1;
+            else
+                return FTM_PINS_STOP;
+        }
+    }
+    return FTM_PINS_STOP;
+}
+
+System_Errors OhiGrove_ftmEnable (OhiGrove_Conn connector, Ftm_Mode mode, uint16_t modulo, uint16_t configurations)
+{
+    Ftm_DeviceHandle device = NULL;
+
+    device = OhiGrove_getFtmDevice(connector);
+
+    if (modulo != 0)
+        OhiGrove_otherTimer.modulo = modulo;
+    else
+        return ERRORS_PARAM_VALUE;
+
+    if (configurations != 0)
+        OhiGrove_otherTimer.configurationBits = configurations;
+    else
+        return ERRORS_PARAM_VALUE;
+
+    OhiGrove_otherTimer.mode = mode;
+
+    Ftm_init(device,0,&OhiGrove_otherTimer);
+
+    return ERRORS_NO_ERROR;
 }
 
 void OhiGrove_addInfraredPin (Gpio_Pins pin)

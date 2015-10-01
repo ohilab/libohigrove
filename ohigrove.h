@@ -116,6 +116,10 @@ Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn connector, OhiGrove_PinNumber numb
 Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn connector, OhiGrove_PinNumber number);
 Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_PinNumber number);
 
+Ftm_DeviceHandle OhiGrove_getFtmDevice (OhiGrove_Conn connector);
+Ftm_Pins OhiGrove_getFtmPin(OhiGrove_Conn connector, OhiGrove_PinNumber number);
+System_Errors OhiGrove_ftmEnable (OhiGrove_Conn connector, Ftm_Mode mode, uint16_t modulo, uint16_t configurations);
+
 void OhiGrove_addInfraredPin (Gpio_Pins pin);
 void OhiGrove_enableInfrared (Gpio_Pins pin);
 void OhiGrove_disableInfrared (Gpio_Pins pin);
