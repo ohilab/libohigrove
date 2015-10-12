@@ -38,6 +38,9 @@
 
 #define OHIGROVE_ADC_MAX_VALUE             4096
 
+typedef void (*OhiGroveCallback)(void);
+typedef void (*OhiGroveCallbackParam)(void* device);
+
 typedef enum _OhiGrove_Board
 {
     OHIGROVE_BOARD_FRDMKL25,
@@ -117,8 +120,10 @@ Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn connector, OhiGrove_P
 Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_PinNumber number);
 
 Ftm_DeviceHandle OhiGrove_getFtmDevice (OhiGrove_Conn connector);
-Ftm_Pins OhiGrove_getFtmPin(OhiGrove_Conn connector, OhiGrove_PinNumber number);
-System_Errors OhiGrove_ftmEnable (OhiGrove_Conn connector, Ftm_Mode mode, uint16_t modulo, uint16_t configurations);
+Ftm_Pins OhiGrove_getFtmPin(OhiGrove_Conn connector);
+Ftm_Channels OhiGrove_getFtmChannel(OhiGrove_Conn connector);
+System_Errors OhiGrove_ftmEnable (OhiGrove_Conn connector, Ftm_Mode mode, uint32_t modulo);
+System_Errors OhiGrove_enableFtmChannel (OhiGrove_Conn connector, OhiGroveCallbackParam callback, void* target);
 
 void OhiGrove_addInfraredPin (Gpio_Pins pin);
 void OhiGrove_enableInfrared (Gpio_Pins pin);

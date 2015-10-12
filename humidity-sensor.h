@@ -44,11 +44,19 @@ typedef struct _OhiGroveHumiditySensor_Device
     Ftm_Channels channel;
     Ftm_DeviceHandle device;
 
+    uint8_t bitCounted;
+
+    uint16_t data1;
+    uint16_t data2;
+
+    uint16_t countValue[41];
+
 } OhiGroveHumiditySensor_Device;
 
 void OhiGroveHumiditySensor_init (OhiGroveHumiditySensor_Device* dev);
 
 void OhiGroveHumiditySensor_doMeasure (OhiGroveHumiditySensor_Device* dev);
+void OhiGroveHumiditySensor_isr (OhiGroveHumiditySensor_Device* dev);
 
 uint16_t OhiGroveHumiditySensor_getTemperature (OhiGroveHumiditySensor_Device* dev);
 uint16_t OhiGroveHumiditySensor_getHumidity (OhiGroveHumiditySensor_Device* dev);
