@@ -52,6 +52,6 @@ uint16_t OhiGroveAlcoholSensor_get (OhiGroveAlcoholSensor_Device* dev)
 {
     uint16_t result;
 
-    Adc_readValue(dev->device,dev->channel,&result);
+    Adc_readValue(dev->device,dev->channel,&result,ADC_INPUTTYPE_SINGLE_ENDED);
     return result;
 }

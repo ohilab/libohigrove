@@ -76,7 +76,7 @@ uint16_t OhiGroveWaterSensor_getAnalog (OhiGroveWaterSensor_Device* dev)
 	if(dev->connectorType == WATERSENSOR_CONNTYPE_ANALOG)
 	{
 
-		Adc_readValue(dev->device,dev->channel,&result);
+		Adc_readValue(dev->device,dev->channel,&result,ADC_INPUTTYPE_SINGLE_ENDED);
 
 		return result; //return a low value if there are water
 

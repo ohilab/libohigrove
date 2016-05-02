@@ -67,8 +67,8 @@ void OhiGroveThumbJoystick_get (OhiGroveThumbJoystick_Device* dev, uint16_t *x, 
     uint16_t result_y = 0;
     bool result_click = 0;
 
-    Adc_readValue(dev->device1,dev->channel1,&result_x);
-    Adc_readValue(dev->device2,dev->channel2,&result_y);
+    Adc_readValue(dev->device1,dev->channel1,&result_x,ADC_INPUTTYPE_SINGLE_ENDED);
+    Adc_readValue(dev->device2,dev->channel2,&result_y,ADC_INPUTTYPE_SINGLE_ENDED);
 
     *x = result_x;
     *y = result_y;

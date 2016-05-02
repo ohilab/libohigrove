@@ -177,20 +177,20 @@ typedef struct
 } OhiGrove_FtmConnector;
 
 
-void OhiGroveSerial_isrFtm0();
-void OhiGroveSerial_isrFtm1();
+void OhiGrove_isrFtm0();
+void OhiGrove_isrFtm1();
 
 static OhiGrove_FtmConnector OhiGrove_ftm[] =
 {
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
-    {OHIGROVE_CONN_D2,   FTM_PINS_PTD4,  FTM_CHANNELS_CH4, 0, OhiGroveSerial_isrFtm0, 0, 0},
-    {OHIGROVE_CONN_D3,   FTM_PINS_PTA12, FTM_CHANNELS_CH0, 1, OhiGroveSerial_isrFtm1, 0, 0},
-    {OHIGROVE_CONN_D4,   FTM_PINS_PTA4,  FTM_CHANNELS_CH1, 0, OhiGroveSerial_isrFtm0, 0, 0},
-    {OHIGROVE_CONN_D5,   FTM_PINS_PTA5,  FTM_CHANNELS_CH2, 0, OhiGroveSerial_isrFtm0, 0, 0},
-    {OHIGROVE_CONN_D6,   FTM_PINS_PTC8,  FTM_CHANNELS_CH4, 0, OhiGroveSerial_isrFtm0, 0, 0},
-    {OHIGROVE_CONN_D7,   FTM_PINS_PTC9,  FTM_CHANNELS_CH5, 0, OhiGroveSerial_isrFtm0, 0, 0},
-    {OHIGROVE_CONN_D8,   FTM_PINS_PTA13, FTM_CHANNELS_CH1, 1, OhiGroveSerial_isrFtm1, 0, 0},
+    {OHIGROVE_CONN_D2,   FTM_PINS_PTD4,  FTM_CHANNELS_CH4, 0, OhiGrove_isrFtm0, 0, 0},
+    {OHIGROVE_CONN_D3,   FTM_PINS_PTA12, FTM_CHANNELS_CH0, 1, OhiGrove_isrFtm1, 0, 0},
+    {OHIGROVE_CONN_D4,   FTM_PINS_PTA4,  FTM_CHANNELS_CH1, 0, OhiGrove_isrFtm0, 0, 0},
+    {OHIGROVE_CONN_D5,   FTM_PINS_PTA5,  FTM_CHANNELS_CH2, 0, OhiGrove_isrFtm0, 0, 0},
+    {OHIGROVE_CONN_D6,   FTM_PINS_PTC8,  FTM_CHANNELS_CH4, 0, OhiGrove_isrFtm0, 0, 0},
+    {OHIGROVE_CONN_D7,   FTM_PINS_PTC9,  FTM_CHANNELS_CH5, 0, OhiGrove_isrFtm0, 0, 0},
+    {OHIGROVE_CONN_D8,   FTM_PINS_PTA13, FTM_CHANNELS_CH1, 1, OhiGrove_isrFtm1, 0, 0},
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
@@ -375,10 +375,10 @@ void OhiGrove_initBoard ()
     foutBUS = Clock_getFrequency(CLOCK_BUS);
 
 
-    Ftm_init(FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
+    Ftm_init(OB_FTM2,OhiGrove_baseTimerInterrupt,&OhiGrove_baseTimer);
     OhiGrove_milliseconds = 0;
 
-    Adc_init(ADC0,&OhiGrove_adcConfig);
+    Adc_init(OB_ADC0,0,&OhiGrove_adcConfig);
 
     for (index = 0; index < OHIGROVE_DIGITAL_SIZE; ++index)
     {
@@ -522,7 +522,7 @@ Uart_DeviceHandle OhiGrove_getUartDevice (OhiGrove_Conn connector)
     {
 #if defined (LIBOHIBOARD_FRDMKL25Z)
     case OHIGROVE_CONN_UART:
-        return UART0;
+        return OB_UART0;
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
 #endif
@@ -543,7 +543,10 @@ System_Errors OhiGrove_uartEnable (OhiGrove_Conn connector, uint32_t baudrate)
     if (baudrate != 0)
         OhiGrove_uartConfig.baudrate = baudrate;
 
-    return Uart_open(device,OhiGrove_getUartCallback(connector),&OhiGrove_uartConfig);
+    OhiGrove_uartConfig.callbackRx = OhiGrove_getUartCallback(connector);
+    OhiGrove_uartConfig.callbackTx = 0;
+
+    return Uart_open(device,&OhiGrove_uartConfig);
 }
 
 Adc_Pins OhiGrove_getAnalogPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)
@@ -597,7 +600,7 @@ Adc_DeviceHandle OhiGrove_getAnalogDevice (OhiGrove_Conn connector, OhiGrove_Pin
 	    	switch (device)
 	    	{
 	    	case 0:
-	    		return ADC0;
+	    		return OB_ADC0;
 #if defined (LIBOHIBOARD_OHIBOARD_R1)
 	    	case 1:
 	    		return ADC1;
@@ -616,19 +619,19 @@ Ftm_DeviceHandle OhiGrove_getFtmDevice (OhiGrove_Conn connector)
 	{
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 	case OHIGROVE_CONN_D2:
-		return FTM0;
+		return OB_FTM0;
 	case OHIGROVE_CONN_D3:
-		return FTM1;
+		return OB_FTM1;
 	case OHIGROVE_CONN_D4:
-		return FTM0;
+		return OB_FTM0;
 	case OHIGROVE_CONN_D5:
-		return FTM0;
+		return OB_FTM0;
 	case OHIGROVE_CONN_D6:
-		return FTM0;
+		return OB_FTM0;
 	case OHIGROVE_CONN_D7:
-		return FTM0;
+		return OB_FTM0;
 	case OHIGROVE_CONN_D8:
-		return FTM1;
+		return OB_FTM1;
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
 #endif
@@ -712,7 +715,7 @@ System_Errors OhiGrove_enableFtmChannel (OhiGrove_Conn connector, OhiGroveCallba
     return ERRORS_PARAM_VALUE;
 }
 
-void OhiGroveSerial_isrFtm0()
+void OhiGrove_isrFtm0()
 {
     uint8_t i = 0;
 
@@ -720,17 +723,17 @@ void OhiGroveSerial_isrFtm0()
     {
         if (OhiGrove_ftm[i].pin1Device == 0)
         {
-            if (Ftm_isChannelInterrupt(FTM0,OhiGrove_ftm[i].pin1Channel))
+            if (Ftm_isChannelInterrupt(OB_FTM0,OhiGrove_ftm[i].pin1Channel))
             {
                 OhiGrove_ftm[i].channelCallback(OhiGrove_ftm[i].target);
 
-                Ftm_clearChannelFlagInterrupt(FTM0,OhiGrove_ftm[i].pin1Channel);
+                Ftm_clearChannelFlagInterrupt(OB_FTM0,OhiGrove_ftm[i].pin1Channel);
             }
         }
     }
 }
 
-void OhiGroveSerial_isrFtm1()
+void OhiGrove_isrFtm1()
 {
     uint8_t i = 0;
 
@@ -738,11 +741,11 @@ void OhiGroveSerial_isrFtm1()
     {
         if (OhiGrove_ftm[i].pin1Device == 1)
         {
-            if (Ftm_isChannelInterrupt(FTM1,OhiGrove_ftm[i].pin1Channel))
+            if (Ftm_isChannelInterrupt(OB_FTM1,OhiGrove_ftm[i].pin1Channel))
             {
                 OhiGrove_ftm[i].channelCallback(OhiGrove_ftm[i].target);
 
-                Ftm_clearChannelFlagInterrupt(FTM1,OhiGrove_ftm[i].pin1Channel);
+                Ftm_clearChannelFlagInterrupt(OB_FTM1,OhiGrove_ftm[i].pin1Channel);
             }
         }
     }

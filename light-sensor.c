@@ -52,7 +52,7 @@ uint16_t OhiGroveLightSensor_get (OhiGroveLightSensor_Device* dev)
 {
     uint16_t result;
 
-    Adc_readValue(dev->device,dev->channel,&result);
+    Adc_readValue(dev->device,dev->channel,&result,ADC_INPUTTYPE_SINGLE_ENDED);
 
     return result;
 }
@@ -62,7 +62,7 @@ uint32_t OhiGroveLightSensor_getResistor (OhiGroveLightSensor_Device* dev)
     uint16_t result;
     uint32_t resistor;
 
-    Adc_readValue(dev->device,dev->channel,&result);
+    Adc_readValue(dev->device,dev->channel,&result,ADC_INPUTTYPE_SINGLE_ENDED);
     resistor = (uint32_t) (((uint32_t)(OHIGROVE_ADC_MAX_VALUE - result) * 10000) / result);
 
     return resistor;
