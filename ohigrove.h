@@ -110,7 +110,7 @@ uint32_t OhiGrove_currentTime ();
 Gpio_Pins OhiGrove_getDigitalPin (OhiGrove_Conn connector,  OhiGrove_PinNumber number);
 
 Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector);
-System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate);
+System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate, bool pullupEnable);
 
 Uart_DeviceHandle OhiGrove_getUartDevice (OhiGrove_Conn connector);
 System_Errors OhiGrove_uartEnable (OhiGrove_Conn connector, uint32_t baudrate);

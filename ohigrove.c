@@ -79,13 +79,16 @@ typedef struct
     Iic_SclPins scl;
     Iic_SdaPins sda;
 
+    Gpio_Pins sclGpio;
+    Gpio_Pins sdaGpio;
+
 } OhiGrove_IicBusConnector;
 
 const OhiGrove_IicBusConnector OhiGrove_iicBus[] =
 {
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
-    {OHIGROVE_CONN_I2C, IIC_PINS_PTC1, IIC_PINS_PTC2},
+    {OHIGROVE_CONN_I2C, IIC_PINS_PTC1, IIC_PINS_PTC2, GPIO_PINS_PTC1, GPIO_PINS_PTC2},
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 
@@ -452,7 +455,7 @@ Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector)
 	{
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 	case OHIGROVE_CONN_I2C:
-		return IIC1;
+		return OB_IIC1;
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
 	case OHIGROVE_CONN_I2C1:
 		return IIC0;
@@ -466,7 +469,7 @@ Iic_DeviceHandle OhiGrove_getIicDevice (OhiGrove_Conn connector)
 	return NULL;
 }
 
-System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate)
+System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate, bool pullupEnable)
 {
 	Iic_DeviceHandle device = NULL;
 
@@ -475,6 +478,8 @@ System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate)
 	OhiGrove_iicConfig.sdaPin = OhiGrove_getIicSdaPin(connector);
 	if (baudrate != 0)
 		OhiGrove_iicConfig.baudRate = (baudrate);
+
+	OhiGrove_iicConfig.pullupEnable = pullupEnable;
 
 	return Iic_init(device, &OhiGrove_iicConfig);
 }

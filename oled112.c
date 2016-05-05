@@ -192,7 +192,7 @@ void OhiGroveOled112_init(OhiGroveOled112_Device* dev)
     System_Errors errors = ERRORS_NO_ERROR;
 
     dev->device = OhiGrove_getIicDevice(dev->connector);
-    errors = OhiGrove_iicEnable(dev->connector, dev->baudrate);
+    errors = OhiGrove_iicEnable(dev->connector, dev->baudrate,FALSE);
 
     OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_DISPLAY_OFF);
     OhiGroveOled112_sendCommand(dev,OHIGROVEOLED112_CMD_DISPLAY_ON);
