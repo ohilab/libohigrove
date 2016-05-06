@@ -54,6 +54,7 @@ typedef struct _OhiGroveLcdRgbB_Device
 void OhiGroveLcdRgbB_init(OhiGroveLcdRgbB_Device* dev);
 
 void OhiGroveLcdRgbB_write (OhiGroveLcdRgbB_Device* dev, uint8_t ch);
+void OhiGroveLcdRgbB_writeString (OhiGroveLcdRgbB_Device* dev, const uint8_t *data);
 
 void OhiGroveLcdRgbB_displayOn (OhiGroveLcdRgbB_Device* dev);
 void OhiGroveLcdRgbB_displayOff (OhiGroveLcdRgbB_Device* dev);

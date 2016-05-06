@@ -156,6 +156,17 @@ void OhiGroveLcdRgbB_write (OhiGroveLcdRgbB_Device* dev, uint8_t ch)
     OhiGroveLcdRgbB_sendLcdCommand(dev,ch,TRUE);
 }
 
+void OhiGroveLcdRgbB_writeString (OhiGroveLcdRgbB_Device* dev, const uint8_t *data)
+{
+    if (data)
+    {
+        while (*data)
+        {
+            OhiGroveLcdRgbB_sendLcdCommand(dev,*data++,TRUE);
+        }
+    }
+}
+
 void OhiGroveLcdRgbB_displayOn (OhiGroveLcdRgbB_Device* dev)
 {
     dev->display |= OHIGROVELCDRGBB_DISPLAY_ON;
