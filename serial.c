@@ -128,9 +128,23 @@ void OhiGroveSerial_printUInt(OhiGroveSerial_Device* dev, uint16_t value)
     Uart_sendString(dev->device,text);
 }
 
+void OhiGroveSerial_printULong(OhiGroveSerial_Device* dev, uint32_t value)
+{
+    uint8_t text[11];
+    u32td(text,value);
+
+    Uart_sendString(dev->device,text);
+}
+
 void OhiGroveSerial_printlnUInt(OhiGroveSerial_Device* dev, uint16_t value)
 {
     OhiGroveSerial_printUInt(dev,value);
+    Uart_sendString(dev->device,"\r\n");
+}
+
+void OhiGroveSerial_printlnULong(OhiGroveSerial_Device* dev, uint32_t value)
+{
+    OhiGroveSerial_printULong(dev,value);
     Uart_sendString(dev->device,"\r\n");
 }
 

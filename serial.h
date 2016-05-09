@@ -76,6 +76,9 @@ void OhiGroveSerial_printlnUInt(OhiGroveSerial_Device* dev, uint16_t value);
 void OhiGroveSerial_printInt(OhiGroveSerial_Device* dev, int16_t value);
 void OhiGroveSerial_printlnInt(OhiGroveSerial_Device* dev, int16_t value);
 
+void OhiGroveSerial_printULong(OhiGroveSerial_Device* dev, uint32_t value);
+void OhiGroveSerial_printlnULong(OhiGroveSerial_Device* dev, uint32_t value);
+
 System_Errors OhiGroveSerial_printFloat(OhiGroveSerial_Device* dev, float value, uint8_t precision);
 System_Errors OhiGroveSerial_printlnFloat(OhiGroveSerial_Device* dev, float value, uint8_t precision);
 
