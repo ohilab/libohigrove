@@ -298,6 +298,19 @@ static uint32_t OhiGrove_10microseconds = 0;
 
 static uint8_t OhiGrove_infraredTimer = 0;
 
+/* Time of day */
+static void OhiGrove_updateTimeOfDay (void);
+
+static Time_UnixTime OhiGrove_timestamp = 1451606400; /* 2016.01.01 00:00:00 */
+
+static float OhiGrove_currentSecond = 1.0F;
+
+static Rtc_Config OhiGrove_rtc = {
+        .clockSource = RTC_CLOCK_LPO,
+        .callbackAlarm = 0,
+        .callbackSecond = 0
+};
+
 static void OhiGrove_baseTimerInterrupt ()
 {
 	uint8_t i = 0;
@@ -352,6 +365,43 @@ void OhiGrove_delay10Microsecond (uint32_t usDelay)
 uint32_t OhiGrove_currentTime ()
 {
     return OhiGrove_milliseconds;
+}
+
+static void OhiGrove_updateTimeOfDay (void)
+{
+    OhiGrove_currentSecond += 32.768;
+
+    if (OhiGrove_currentSecond > 60.0)
+    {
+        OhiGrove_currentSecond -= 60.0;
+        OhiGrove_timestamp += 60;
+    }
+}
+
+void OhiGrove_enableTimeOfDay (void)
+{
+    Time_TimeType time;
+    Time_DateType date;
+
+    Time_getUnixTime(&date,&time);
+    OhiGrove_currentSecond = time.seconds;
+    Rtc_init(OB_RTC0,&OhiGrove_rtc);
+}
+
+Time_UnixTime OhiGrove_getTimestamp (void)
+{
+    return (Time_UnixTime) OhiGrove_timestamp;
+}
+
+void OhiGrove_setTimestamp (Time_UnixTime time)
+{
+    Time_TimeType timeDay;
+    Time_DateType date;
+
+    OhiGrove_timestamp = time;
+    Time_unixtimeToTime(time,&date,&timeDay);
+    OhiGrove_currentSecond = timeDay.seconds;
+    Rtc_enableSecond(OB_RTC0,OhiGrove_updateTimeOfDay);
 }
 
 void OhiGrove_initBoard ()

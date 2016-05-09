@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (C) 2014 A. C. Open Hardware Ideas Lab
+ * Copyright (C) 2014-2016 A. C. Open Hardware Ideas Lab
  * 
  * Authors:
  *  Marco Giammarini <m.giammarini@warcomeb.it>
@@ -124,6 +124,10 @@ Ftm_Pins OhiGrove_getFtmPin(OhiGrove_Conn connector);
 Ftm_Channels OhiGrove_getFtmChannel(OhiGrove_Conn connector);
 System_Errors OhiGrove_ftmEnable (OhiGrove_Conn connector, Ftm_Mode mode, uint32_t modulo);
 System_Errors OhiGrove_enableFtmChannel (OhiGrove_Conn connector, OhiGroveCallbackParam callback, void* target);
+
+void OhiGrove_enableTimeOfDay (void);
+Time_UnixTime OhiGrove_getTimestamp (void);
+void OhiGrove_setTimestamp (Time_UnixTime time);
 
 void OhiGrove_addInfraredPin (Gpio_Pins pin);
 void OhiGrove_enableInfrared (Gpio_Pins pin);
