@@ -38,7 +38,13 @@
 
 typedef struct _OhiGroveSerial_Device
 {
+
+    /* If GROVE connector */
     OhiGrove_Conn connector;
+
+    /* else NO GROVE connector */
+    Uart_RxPins rxPin;
+    Uart_TxPins txPin;
 
     Uart_DeviceHandle device;
     uint32_t baudrate;

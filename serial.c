@@ -76,8 +76,15 @@ void OhiGroveSerial_init(OhiGroveSerial_Device* dev)
 {
     System_Errors errors = ERRORS_NO_ERROR;
 
-    dev->device = OhiGrove_getUartDevice(dev->connector);
-    errors = OhiGrove_uartEnable(dev->connector, dev->baudrate);
+    if (dev->device == 0)
+    {
+        dev->device = OhiGrove_getUartDevice(dev->connector);
+        errors = OhiGrove_uartEnable(dev->connector, dev->baudrate);
+    }
+    else
+    {
+        errors = OhiGrove_uartEnableByDevice(dev->device, dev->baudrate, dev->txPin, dev->rxPin);
+    }
 
     dev->rxBufferHead = 0;
     dev->rxBufferTail = 0;
@@ -87,11 +94,11 @@ void OhiGroveSerial_init(OhiGroveSerial_Device* dev)
 
 #if defined (LIBOHIBOARD_FRDMKL25Z)
 
-    if (dev->device == UART0)
+    if (dev->device == OB_UART0)
         device[0] = dev;
-    else if (dev->device == UART1)
+    else if (dev->device == OB_UART1)
         device[1] = dev;
-    else if (dev->device == UART2)
+    else if (dev->device == OB_UART2)
         device[2] = dev;
 
 #elif defined (LIBOHIBOARD_OHIBOARD_R1)
