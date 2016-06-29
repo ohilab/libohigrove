@@ -114,6 +114,7 @@ System_Errors OhiGrove_iicEnable (OhiGrove_Conn connector, uint32_t baudrate, bo
 
 Uart_DeviceHandle OhiGrove_getUartDevice (OhiGrove_Conn connector);
 System_Errors OhiGrove_uartEnable (OhiGrove_Conn connector, uint32_t baudrate);
+System_Errors OhiGrove_uartEnableByDevice(Uart_DeviceHandle dev, uint32_t baudrate, Uart_TxPins tx, Uart_RxPins rx);
 
 Adc_Pins OhiGrove_getAnalogPin (OhiGrove_Conn connector, OhiGrove_PinNumber number);
 Adc_ChannelNumber OhiGrove_getAnalogChannel (OhiGrove_Conn connector, OhiGrove_PinNumber number);

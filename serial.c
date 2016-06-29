@@ -202,9 +202,13 @@ uint8_t OhiGroveSerial_available(OhiGroveSerial_Device* dev)
 
 uint8_t OhiGroveSerial_read(OhiGroveSerial_Device* dev)
 {
+    uint8_t data;
+
     if (dev->rxBufferTail != dev->rxBufferHead)
     {
-        return dev->rxBuffer[dev->rxBufferHead++];
+        data = dev->rxBuffer[dev->rxBufferHead++];
+        dev->rxBufferHead &= OHIGROVESERIAL_BUFFER_SIZE;
+        return data;
     }
 }
 

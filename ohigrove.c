@@ -604,6 +604,30 @@ System_Errors OhiGrove_uartEnable (OhiGrove_Conn connector, uint32_t baudrate)
     return Uart_open(device,&OhiGrove_uartConfig);
 }
 
+System_Errors OhiGrove_uartEnableByDevice (Uart_DeviceHandle dev, uint32_t baudrate, Uart_TxPins tx, Uart_RxPins rx)
+{
+    Uart_Config localConfig =
+    {
+        .txPin        = tx,
+        .rxPin        = rx,
+
+        .dataBits     = UART_DATABITS_EIGHT,
+        .parity       = UART_PARITY_NONE,
+
+        .oversampling = 16,
+
+//        .callbackRx   = 0,
+        .callbackTx   = 0,
+    };
+
+    if (baudrate != 0)
+        localConfig.baudrate = baudrate;
+
+
+
+    return Uart_open(dev,&localConfig);
+}
+
 Adc_Pins OhiGrove_getAnalogPin(OhiGrove_Conn connector, OhiGrove_PinNumber number)
 {
 	uint8_t i = 0;
